@@ -4,5 +4,7 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-zusi-xml-lib.workspace = true
+clap.workspace = true
+glob.workspace = true
 zusi-result-lib = { path = "../zusi-result-lib" }
+zusi-xml-lib.workspace = true
