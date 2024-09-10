@@ -1,0 +1,8 @@
+[package]
+name = "zusi-result-lib"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+clap = { workspace = true, features = ["derive"] }
+time = { workspace = true, features = ["macros", "serde-human-readable"] }

@@ -1,0 +1,23 @@
+[workspace]
+members = [
+    "zusi-result-lib",
+    "zusi-result-cli",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+
+[workspace.dependencies]
+clap = "4.5.4"
+glob = "0.3.1"
+time = { version = "0.3.36" }
+zusi-xml-lib = { path = "../zusi-xml-lib" }
+
+[profile.release]
+panic = "abort" # Strip expensive panic clean-up logic
+codegen-units = 1 # Compile crates one after another so the compiler can optimize better
+lto = true # Enables link to optimizations
+opt-level = "s" # Optimize for binary size
+strip = true # Remove debug symbols
