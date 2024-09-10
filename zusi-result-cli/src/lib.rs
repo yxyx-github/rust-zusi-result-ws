@@ -33,8 +33,14 @@ pub fn analyse_files(args: AnalyseFilesArgs) -> Result<(), AnalyseFilesError> {
                         }
                         results.push(result);
                     }
-                    Err(e) => {
-                        eprintln!("{:?}", e);
+                    Err(ReadResultError::IOError(e)) => {
+                        eprintln!("Error reading file '{:?}': {:?}", path, e);
+                    }
+                    Err(ReadResultError::DeError(e)) => {
+                        eprintln!("Error during deserialization of '{:?}': {:?}", path, e);
+                    }
+                    Err(ReadResultError::NoResult) => {
+                        eprintln!("The file '{:?}' does not contain a result.", path);
                     }
                 }
             }
