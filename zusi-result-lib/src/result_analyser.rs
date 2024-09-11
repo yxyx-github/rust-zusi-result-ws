@@ -1,8 +1,10 @@
+use crate::result_analyser::helpers::filter_valid_fahrt_weg_and_fahrt_speed;
 use time::Duration;
 use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
 
 #[cfg(test)]
 mod tests;
+mod helpers;
 
 #[derive(PartialEq, Debug)]
 pub enum AnalyseError {
@@ -29,7 +31,10 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
     /// Throws [AnalyseError::NoEntries] if the [ZusiResult] does not contain any [FahrtEintrag](ResultValue::FahrtEintrag) entries.
     pub fn distance(&self) -> Result<f32, AnalyseError> {
         let result = self.result.as_ref();
-        let filtered_values = filter_valid_fahrt_weg(result);
+
+        // also need to filter fahrt_speed because of usage in pure_average_speed_by_pure_driving_time
+        let filtered_values = filter_valid_fahrt_weg_and_fahrt_speed(result);
+
         if filtered_values.len() > 0 {
             let ResultValue::FahrtEintrag(first) = filtered_values.first().unwrap();
             let ResultValue::FahrtEintrag(last) = filtered_values.last().unwrap();
@@ -73,7 +78,6 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
         if pure_driving_time == 0.0 {
             Err(AnalyseError::ZeroDrivingTime)
         } else {
-            // println!("{distance} / {pure_driving_time}");
             Ok(distance / pure_driving_time)
         }
     }
@@ -86,7 +90,9 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
     /// Throws [AnalyseError::ZeroDistance] if the distance driven is zero.
     pub fn pure_average_speed_by_weighted_local_speeds(&self) -> Result<f32, AnalyseError> {
         let result = self.result.as_ref();
+
         let filtered_values = filter_valid_fahrt_weg_and_fahrt_speed(result);
+
         if self.distance()? == 0. {
             Err(AnalyseError::ZeroDistance)
         } else if filtered_values.len() > 1 {
@@ -123,7 +129,10 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
     /// Throws [AnalyseError::NoEntries] if the [ZusiResult] does not contain any [FahrtEintrag](ResultValue::FahrtEintrag) entries.
     pub fn pure_driving_time(&self) -> Result<Duration, AnalyseError> {
         let result = self.result.as_ref();
-        let filtered_values = filter_valid_fahrt_speed(result);
+
+        // also need to filter fahrt_weg because of usage in pure_average_speed_by_pure_driving_time
+        let filtered_values = filter_valid_fahrt_weg_and_fahrt_speed(result);
+
         if filtered_values.len() > 1 {
             let mut driving_time = Duration::seconds(0);
             for i in 0..filtered_values.len() - 1 {
@@ -146,34 +155,6 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
 pub enum PureAverageSpeedAlgorithm {
     PureDrivingTime,
     WeightedLocalSpeeds,
-}
-
-// TODO: extract helpers into separate module, e.g. called 'data_preparation'
-// TODO: add tests: both for helpers and for ResultAnalyser methods (distance, pure_average_speed?, pure_driving_time) that use these helpers
-
-fn zusi_result_to_ptr_vec(result: &ZusiResult) -> Vec<&ResultValue> {
-    result.value.iter().map(|result_value| result_value).collect()
-}
-
-fn filter_valid_fahrt_weg(result: &ZusiResult) -> Vec<&ResultValue> {
-    zusi_result_to_ptr_vec(result).into_iter().filter(
-            |ResultValue::FahrtEintrag(fahrt_eintrag)|
-            fahrt_eintrag.fahrt_weg != -1.
-    ).collect()
-}
-
-fn filter_valid_fahrt_speed(result: &ZusiResult) -> Vec<&ResultValue> {
-    zusi_result_to_ptr_vec(result).into_iter().filter(
-        |ResultValue::FahrtEintrag(fahrt_eintrag)|
-            fahrt_eintrag.fahrt_speed != -1.
-    ).collect()
-}
-
-fn filter_valid_fahrt_weg_and_fahrt_speed(result: &ZusiResult) -> Vec<&ResultValue> {
-    zusi_result_to_ptr_vec(result).into_iter().filter(
-        |ResultValue::FahrtEintrag(fahrt_eintrag)|
-            fahrt_eintrag.fahrt_weg != -1. && fahrt_eintrag.fahrt_speed != -1.
-    ).collect()
 }
 
 impl<R: AsRef<ZusiResult>> AsRef<ResultAnalyser<R>> for ResultAnalyser<R> {
