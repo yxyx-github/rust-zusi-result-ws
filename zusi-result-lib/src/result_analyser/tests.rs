@@ -3,7 +3,7 @@ use time::macros::datetime;
 use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
 use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::FahrtEintrag;
 
-use crate::result_analyser::{AnalyseError, ResultAnalyser};
+use crate::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm, ResultAnalyser};
 
 #[test]
 fn create_result_analyser_from_ref() {
@@ -118,30 +118,47 @@ fn test_average_speed_0() {
 }
 
 #[test]
-fn test_pure_average_speed_3() {
+fn test_pure_average_speed() {
     let result = ZusiResult::builder()
         .datum(datetime!(2019-01-01 23:14))
         .value(vec![
             ResultValue::FahrtEintrag(FahrtEintrag::builder()
                 .fahrt_weg(5.)
-                .fahrt_zeit(datetime!(2019-01-01 23:18))
-                .fahrt_speed(10.)
+                .fahrt_zeit(datetime!(2019-01-01 23:18:04))
+                .fahrt_speed(46.)
                 .build()),
             ResultValue::FahrtEintrag(FahrtEintrag::builder()
-                .fahrt_weg(15.)
-                .fahrt_zeit(datetime!(2019-01-01 23:18))
-                .fahrt_speed(30.)
+                .fahrt_weg(55.)
+                .fahrt_zeit(datetime!(2019-01-01 23:18:06))
+                .fahrt_speed(4.)
                 .build()),
             ResultValue::FahrtEintrag(FahrtEintrag::builder()
-                .fahrt_weg(35.)
-                .fahrt_zeit(datetime!(2019-01-01 23:18))
-                .fahrt_speed(100.)
+                .fahrt_weg(145.)
+                .fahrt_zeit(datetime!(2019-01-01 23:18:26))
+                .fahrt_speed(5.)
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_weg(165.)
+                .fahrt_zeit(datetime!(2019-01-01 23:18:34))
+                .fahrt_speed(0.)
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_weg(165.)
+                .fahrt_zeit(datetime!(2019-01-01 23:19:36))
+                .fahrt_speed(0.)
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_weg(245.)
+                .fahrt_zeit(datetime!(2019-01-01 23:19:56))
+                .fahrt_speed(8.)
                 .build()),
         ])
         .build();
 
     let analyser = ResultAnalyser::new(result);
-    assert_eq!(analyser.pure_average_speed().unwrap(), 50.);
+    // TODO: find out reason for different results
+    assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).unwrap(), 4.8);
+    assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 8.4375);
 }
 
 #[test]
@@ -151,19 +168,20 @@ fn test_pure_average_speed_2() {
         .value(vec![
             ResultValue::FahrtEintrag(FahrtEintrag::builder()
                 .fahrt_weg(5.)
-                .fahrt_zeit(datetime!(2019-01-01 23:18))
-                .fahrt_speed(10.)
+                .fahrt_zeit(datetime!(2019-01-01 23:18:04))
+                .fahrt_speed(30.)
                 .build()),
             ResultValue::FahrtEintrag(FahrtEintrag::builder()
-                .fahrt_weg(15.)
-                .fahrt_zeit(datetime!(2019-01-01 23:18))
-                .fahrt_speed(30.)
+                .fahrt_weg(45.)
+                .fahrt_zeit(datetime!(2019-01-01 23:18:06))
+                .fahrt_speed(10.)
                 .build()),
         ])
         .build();
 
     let analyser = ResultAnalyser::new(result);
-    assert_eq!(analyser.pure_average_speed().unwrap(), 20.);
+    assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).unwrap(), 20.);
+    assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 20.);
 }
 
 #[test]
@@ -180,7 +198,8 @@ fn test_pure_average_speed_1() {
         .build();
 
     let analyser = ResultAnalyser::new(result);
-    assert_eq!(analyser.pure_average_speed(), Err(AnalyseError::ZeroDistance));
+    assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime), Err(AnalyseError::ZeroDrivingTime));
+    assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds), Err(AnalyseError::ZeroDistance));
 }
 
 #[test]
@@ -191,7 +210,8 @@ fn test_pure_average_speed_0() {
         .build();
 
     let analyser = ResultAnalyser::new(result);
-    assert_eq!(analyser.pure_average_speed(), Err(AnalyseError::NoEntries));
+    assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime), Err(AnalyseError::NoEntries));
+    assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds), Err(AnalyseError::NoEntries));
 }
 
 #[test]

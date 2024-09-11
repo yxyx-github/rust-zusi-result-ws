@@ -3,7 +3,7 @@ use time::macros::datetime;
 use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
 use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::FahrtEintrag;
 
-use crate::result_analyser::{AnalyseError, ResultAnalyser};
+use crate::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm, ResultAnalyser};
 use crate::result_analyser_group::{CreateAnalyserGroupError, ResultAnalyserGroup};
 
 #[test]
@@ -68,7 +68,8 @@ fn test_caching() {
         assert_eq!(analyser_group.total_distance().unwrap(), 20.);
         assert_eq!(analyser_group.average_distance().unwrap(), 10.);
         assert_eq!(analyser_group.average_speed().unwrap(), 0.0065396824);
-        assert_eq!(analyser_group.pure_average_speed().unwrap(), 3.9);
+        assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).unwrap(), 0.0092);
+        assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 3.9);
         assert_eq!(analyser_group.total_driving_time().unwrap(), Duration::minutes(65));
         assert_eq!(analyser_group.total_pure_driving_time().unwrap(), Duration::minutes(45));
     }
@@ -317,13 +318,13 @@ fn test_pure_average_speed_2() {
         .datum(datetime!(2019-01-01 23:14))
         .value(vec![
             ResultValue::FahrtEintrag(FahrtEintrag::builder()
-                .fahrt_weg(0.)
-                .fahrt_zeit(datetime!(2019-01-01 23:18))
+                .fahrt_weg(10.)
+                .fahrt_zeit(datetime!(2019-01-01 10:22:18))
                 .fahrt_speed(8.)
                 .build()),
             ResultValue::FahrtEintrag(FahrtEintrag::builder()
-                .fahrt_weg(3.)
-                .fahrt_zeit(datetime!(2019-01-01 23:18))
+                .fahrt_weg(410.)
+                .fahrt_zeit(datetime!(2019-01-01 10:23:08))
                 .fahrt_speed(8.)
                 .build()),
         ])
@@ -332,14 +333,14 @@ fn test_pure_average_speed_2() {
         .datum(datetime!(2019-01-01 23:14))
         .value(vec![
             ResultValue::FahrtEintrag(FahrtEintrag::builder()
-                .fahrt_weg(0.)
-                .fahrt_zeit(datetime!(2019-01-01 23:18))
-                .fahrt_speed(4.)
+                .fahrt_weg(10.)
+                .fahrt_zeit(datetime!(2019-01-01 10:22:18))
+                .fahrt_speed(32.)
                 .build()),
             ResultValue::FahrtEintrag(FahrtEintrag::builder()
-                .fahrt_weg(9.)
-                .fahrt_zeit(datetime!(2019-01-01 23:18))
-                .fahrt_speed(4.)
+                .fahrt_weg(810.)
+                .fahrt_zeit(datetime!(2019-01-01 10:22:43))
+                .fahrt_speed(32.)
                 .build()),
         ])
         .build();
@@ -349,7 +350,8 @@ fn test_pure_average_speed_2() {
         ResultAnalyser::new(result2),
     ]).unwrap();
 
-    assert_eq!(analyser_group.pure_average_speed().unwrap(), 5.);
+    assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).unwrap(), 24.);
+    assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 24.);
 }
 
 #[test]
@@ -380,7 +382,8 @@ fn test_pure_average_speed_1() {
         ResultAnalyser::new(result2),
     ]).unwrap();
 
-    assert_eq!(analyser_group.pure_average_speed(), Err(AnalyseError::ZeroDistance));
+    assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime), Err(AnalyseError::ZeroDrivingTime));
+    assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds), Err(AnalyseError::ZeroDistance));
 }
 
 #[test]
@@ -399,7 +402,8 @@ fn test_pure_average_speed_0() {
         ResultAnalyser::new(result2),
     ]).unwrap();
 
-    assert_eq!(analyser_group.pure_average_speed(), Err(AnalyseError::NoEntries));
+    assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime), Err(AnalyseError::NoEntries));
+    assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds), Err(AnalyseError::NoEntries));
 }
 
 #[test]

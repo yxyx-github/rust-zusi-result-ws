@@ -6,7 +6,7 @@ use std::io::Read;
 use std::path::PathBuf;
 
 use glob::{glob, PatternError};
-use zusi_result_lib::result_analyser::{AnalyseError, ResultAnalyser};
+use zusi_result_lib::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm, ResultAnalyser};
 use zusi_result_lib::result_analyser_group::{CreateAnalyserGroupError, ResultAnalyserGroup};
 use zusi_xml_lib::xml::zusi::{DeError, Zusi, ZusiValue};
 use zusi_xml_lib::xml::zusi::result::ZusiResult;
@@ -85,13 +85,23 @@ pub enum PrintAnalysisError {
 
 fn print_analysis(results: Vec<ZusiResult>) -> Result<(), PrintAnalysisError> {
     let mut analyser_group: ResultAnalyserGroup<ResultAnalyser<ZusiResult>, ZusiResult> = results.try_into().map_err(|e| PrintAnalysisError::CreateAnalyserGroupError(e))?;
+
     println!("total distance: {} m", analyser_group.total_distance().map_err(|e| PrintAnalysisError::AnalyseError(e))?);
+
     println!("average distance: {} m", analyser_group.average_distance().map_err(|e| PrintAnalysisError::AnalyseError(e))?);
+
     let average_speed = analyser_group.average_speed().map_err(|e| PrintAnalysisError::AnalyseError(e))?;
     println!("average speed: {} m/s = {} km/h", average_speed, average_speed * 3.6);
-    let pure_average_speed = analyser_group.pure_average_speed().map_err(|e| PrintAnalysisError::AnalyseError(e))?;
-    println!("pure average speed: {} m/s = {} km/h", pure_average_speed, pure_average_speed * 3.6);
+
+    let pure_average_speed = analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).map_err(|e| PrintAnalysisError::AnalyseError(e))?;
+    println!("pure average speed (by pure driving time): {} m/s = {} km/h", pure_average_speed, pure_average_speed * 3.6);
+
+    let pure_average_speed = analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).map_err(|e| PrintAnalysisError::AnalyseError(e))?;
+    println!("pure average speed (by weighted local speeds): {} m/s = {} km/h", pure_average_speed, pure_average_speed * 3.6);
+
     println!("total driving time: {}", analyser_group.total_driving_time().map_err(|e| PrintAnalysisError::AnalyseError(e))?);
+
     println!("total pure driving time: {}", analyser_group.total_pure_driving_time().map_err(|e| PrintAnalysisError::AnalyseError(e))?);
+
     Ok(())
 }

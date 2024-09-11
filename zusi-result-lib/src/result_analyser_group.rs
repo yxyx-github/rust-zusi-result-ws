@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 use time::Duration;
 use zusi_xml_lib::xml::zusi::result::ZusiResult;
 
-use crate::result_analyser::{AnalyseError, ResultAnalyser};
+use crate::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm, ResultAnalyser};
 use crate::result_analyser_group::analyser_group_cache::AnalyserGroupCache;
 
 #[cfg(test)]
@@ -92,19 +92,30 @@ impl<A: AsRef<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
     /// For more details see [distance](ResultAnalyser::pure_average_speed).
     ///
     /// Errors will be propagated.
-    pub fn pure_average_speed(&mut self) -> Result<f32, AnalyseError> {
-        if let Some(value) = &self.cache.pure_average_speed {
-            return Ok(*value);
-        }
+    pub fn pure_average_speed(&mut self, algorithm: PureAverageSpeedAlgorithm) -> Result<f32, AnalyseError> {
+        match (
+            algorithm,
+            &self.cache.pure_average_speed_by_pure_driving_time,
+            &self.cache.pure_average_speed_by_weighted_local_speeds,
+        ) {
+            (PureAverageSpeedAlgorithm::PureDrivingTime, Some(value), _) => return Ok(*value),
+            (PureAverageSpeedAlgorithm::WeightedLocalSpeeds, _, Some(value)) => return Ok(*value),
+            _ => {}
+        };
 
         let mut weighted_speed_sum = 0.;
         for analyser in self.analysers.iter() {
-            weighted_speed_sum += analyser.as_ref().distance()? * analyser.as_ref().pure_average_speed()?;
+            weighted_speed_sum += analyser.as_ref().distance()? * analyser.as_ref().pure_average_speed(algorithm)?;
         }
 
         let pure_average_speed = weighted_speed_sum / self.total_distance()?;
 
-        self.cache.pure_average_speed = Some(pure_average_speed);
+        match algorithm {
+            PureAverageSpeedAlgorithm::PureDrivingTime =>
+                self.cache.pure_average_speed_by_pure_driving_time = Some(pure_average_speed),
+            PureAverageSpeedAlgorithm::WeightedLocalSpeeds =>
+                self.cache.pure_average_speed_by_weighted_local_speeds = Some(pure_average_speed),
+        }
         Ok(pure_average_speed)
     }
 
