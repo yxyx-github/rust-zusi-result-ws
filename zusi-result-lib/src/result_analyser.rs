@@ -101,10 +101,10 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
                 let ResultValue::FahrtEintrag(current) = filtered_values.get(i).unwrap();
                 let ResultValue::FahrtEintrag(next) = filtered_values.get(i + 1).unwrap();
                 let local_average_speed = (current.fahrt_speed + next.fahrt_speed) / 2.;
-                let local_distance = next.fahrt_weg - current.fahrt_weg;
-                weighted_speed_sum += local_distance * local_average_speed;
+                let local_driving_time = next.fahrt_zeit - current.fahrt_zeit;
+                weighted_speed_sum += local_driving_time.as_seconds_f32() * local_average_speed;
             }
-            Ok(weighted_speed_sum / self.distance()?)
+            Ok(weighted_speed_sum / self.pure_driving_time()?.as_seconds_f32())
         } else {
             Err(AnalyseError::NoEntries)
         }

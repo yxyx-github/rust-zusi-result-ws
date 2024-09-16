@@ -164,9 +164,8 @@ fn test_pure_average_speed() {
         .build();
 
     let analyser = ResultAnalyser::new(result);
-    // TODO: find out reason for different results
     assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).unwrap(), 4.8);
-    assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 8.4375);
+    assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 4.8);
 }
 
 #[test]

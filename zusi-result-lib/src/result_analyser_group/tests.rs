@@ -69,7 +69,7 @@ fn test_caching() {
         assert_eq!(analyser_group.average_distance().unwrap(), 10.);
         assert_eq!(analyser_group.average_speed().unwrap(), 0.0065396824);
         assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).unwrap(), 0.0092);
-        assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 3.9);
+        assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 3.7599998);
         assert_eq!(analyser_group.total_driving_time().unwrap(), Duration::minutes(65));
         assert_eq!(analyser_group.total_pure_driving_time().unwrap(), Duration::minutes(45));
     }
