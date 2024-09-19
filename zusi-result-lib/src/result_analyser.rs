@@ -151,14 +151,20 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
     }
 }
 
+impl<R: AsRef<ZusiResult>> AsRef<ResultAnalyser<R>> for ResultAnalyser<R> {
+    fn as_ref(&self) -> &ResultAnalyser<R> {
+        &self
+    }
+}
+
 #[derive(Copy, Clone)]
 pub enum PureAverageSpeedAlgorithm {
     PureDrivingTime,
     WeightedLocalSpeeds,
 }
 
-impl<R: AsRef<ZusiResult>> AsRef<ResultAnalyser<R>> for ResultAnalyser<R> {
-    fn as_ref(&self) -> &ResultAnalyser<R> {
-        &self
+impl Default for PureAverageSpeedAlgorithm {
+    fn default() -> Self {
+        Self::PureDrivingTime
     }
 }

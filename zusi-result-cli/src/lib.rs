@@ -93,11 +93,8 @@ fn print_analysis(results: Vec<ZusiResult>) -> Result<(), PrintAnalysisError> {
     let average_speed = analyser_group.average_speed().map_err(|e| PrintAnalysisError::AnalyseError(e))?;
     println!("average speed: {} m/s = {} km/h", average_speed, average_speed * 3.6);
 
-    let pure_average_speed = analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).map_err(|e| PrintAnalysisError::AnalyseError(e))?;
-    println!("pure average speed (by pure driving time): {} m/s = {} km/h", pure_average_speed, pure_average_speed * 3.6);
-
-    let pure_average_speed = analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).map_err(|e| PrintAnalysisError::AnalyseError(e))?;
-    println!("pure average speed (by weighted local speeds): {} m/s = {} km/h", pure_average_speed, pure_average_speed * 3.6);
+    let pure_average_speed = analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::default()).map_err(|e| PrintAnalysisError::AnalyseError(e))?;
+    println!("pure average speed: {} m/s = {} km/h", pure_average_speed, pure_average_speed * 3.6);
 
     println!("total driving time: {}", analyser_group.total_driving_time().map_err(|e| PrintAnalysisError::AnalyseError(e))?);
 
