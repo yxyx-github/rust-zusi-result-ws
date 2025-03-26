@@ -158,7 +158,7 @@ fn test_total_distance_with_error() {
 
     assert_eq!(
         analyser_group.total_distance(),
-        Err(AnalyseError::NoEntries)
+        Err(AnalyseError::NoEntries),
     );
 }
 
@@ -226,7 +226,7 @@ fn test_average_distance_with_error() {
 
     assert_eq!(
         analyser_group.average_distance(),
-        Err(AnalyseError::NoEntries)
+        Err(AnalyseError::NoEntries),
     );
 }
 
@@ -464,7 +464,7 @@ fn test_total_driving_time_with_error() {
 
     assert_eq!(
         analyser_group.total_distance(),
-        Err(AnalyseError::NoEntries)
+        Err(AnalyseError::NoEntries),
     );
 }
 
@@ -538,7 +538,7 @@ fn test_total_pure_driving_time_with_error() {
 
     assert_eq!(
         analyser_group.total_distance(),
-        Err(AnalyseError::NoEntries)
+        Err(AnalyseError::NoEntries),
     );
 }
 
@@ -557,6 +557,6 @@ fn test_try_from_zero_results() {
     assert_eq!(
         ResultAnalyserGroup::try_from(vec![])
             as Result<ResultAnalyserGroup<ResultAnalyser<ZusiResult>, ZusiResult>, CreateAnalyserGroupError>,
-        Err(CreateAnalyserGroupError::NoAnalysers)
+        Err(CreateAnalyserGroupError::NoAnalysers),
     );
 }

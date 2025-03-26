@@ -46,7 +46,6 @@ pub fn analyse_files(args: AnalyseFilesArgs) -> Result<(), AnalyseFilesError> {
             }
             Err(e) => {
                 eprintln!("{:?}", e);
-
             }
         }
     }
