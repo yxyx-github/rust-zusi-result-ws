@@ -1,9 +1,59 @@
-use time::Duration;
 use time::macros::datetime;
-use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
+use time::Duration;
 use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::FahrtEintrag;
+use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
 
 use crate::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm, ResultAnalyser};
+
+#[test]
+fn test_cache() {
+    let result = ZusiResult::builder()
+        .datum(datetime!(2019-01-01 23:14))
+        .value(vec![
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_weg(5.)
+                .fahrt_zeit(datetime!(2019-01-01 23:18:04))
+                .fahrt_speed(46.)
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_weg(55.)
+                .fahrt_zeit(datetime!(2019-01-01 23:18:06))
+                .fahrt_speed(4.)
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_weg(145.)
+                .fahrt_zeit(datetime!(2019-01-01 23:18:26))
+                .fahrt_speed(5.)
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_weg(165.)
+                .fahrt_zeit(datetime!(2019-01-01 23:18:34))
+                .fahrt_speed(0.)
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_weg(165.)
+                .fahrt_zeit(datetime!(2019-01-01 23:19:36))
+                .fahrt_speed(0.)
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_weg(245.)
+                .fahrt_zeit(datetime!(2019-01-01 23:19:56))
+                .fahrt_speed(8.)
+                .build()),
+        ])
+        .build();
+
+    let mut analyser = ResultAnalyser::new(result);
+
+    for _ in 0..2 {
+        assert_eq!(analyser.distance().unwrap(), 240.);
+        assert_eq!(analyser.average_speed().unwrap(), 2.142857);
+        assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).unwrap(), 4.8);
+        assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 4.8);
+        assert_eq!(analyser.driving_time().unwrap(), Duration::seconds(112));
+        assert_eq!(analyser.pure_driving_time().unwrap(), Duration::seconds(50));
+    }
+}
 
 #[test]
 fn create_result_analyser_from_ref() {
@@ -39,7 +89,7 @@ fn test_distance_2() {
         ])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.distance().unwrap(), 20.1);
 }
 
@@ -50,7 +100,7 @@ fn test_distance_0() {
         .value(vec![])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.distance(), Err(AnalyseError::NoEntries));
 }
 
@@ -70,7 +120,7 @@ fn test_average_speed_2() {
         ])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.average_speed().unwrap(), 0.01);
 }
 
@@ -90,7 +140,7 @@ fn test_average_speed_2_zero_distance() {
         ])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.average_speed().unwrap(), 0.);
 }
 
@@ -110,7 +160,7 @@ fn test_average_speed_2_zero_driving_time() {
         ])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.average_speed(), Err(AnalyseError::ZeroDrivingTime));
 }
 
@@ -121,7 +171,7 @@ fn test_average_speed_0() {
         .value(vec![])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.average_speed(), Err(AnalyseError::NoEntries));
 }
 
@@ -163,7 +213,7 @@ fn test_pure_average_speed() {
         ])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).unwrap(), 4.8);
     assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 4.8);
 }
@@ -196,7 +246,7 @@ fn test_pure_average_speed_2() {
         ])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).unwrap(), 20.);
     assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 20.);
 }
@@ -214,7 +264,7 @@ fn test_pure_average_speed_1() {
         ])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime), Err(AnalyseError::ZeroDrivingTime));
     assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds), Err(AnalyseError::ZeroDistance));
 }
@@ -226,7 +276,7 @@ fn test_pure_average_speed_0() {
         .value(vec![])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime), Err(AnalyseError::NoEntries));
     assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds), Err(AnalyseError::NoEntries));
 }
@@ -247,7 +297,7 @@ fn test_driving_time_2() {
         ])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.driving_time().unwrap(), Duration::minutes(80));
 }
 
@@ -258,7 +308,7 @@ fn test_driving_time_0() {
         .value(vec![])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.distance(), Err(AnalyseError::NoEntries));
 }
 
@@ -302,7 +352,7 @@ fn test_pure_driving_time() {
         ])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.pure_driving_time().unwrap(), Duration::minutes(245));
 }
 
@@ -318,7 +368,7 @@ fn test_pure_driving_time_1() {
         ])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.pure_driving_time().unwrap(), Duration::seconds(0));
 }
 
@@ -329,6 +379,6 @@ fn test_pure_driving_time_0() {
         .value(vec![])
         .build();
 
-    let analyser = ResultAnalyser::new(result);
+    let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.pure_driving_time(), Err(AnalyseError::NoEntries));
 }

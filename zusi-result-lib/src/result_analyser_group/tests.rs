@@ -1,13 +1,12 @@
-use time::Duration;
-use time::macros::datetime;
-use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
-use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::FahrtEintrag;
-
 use crate::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm, ResultAnalyser};
 use crate::result_analyser_group::{CreateAnalyserGroupError, ResultAnalyserGroup};
+use time::macros::datetime;
+use time::Duration;
+use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::FahrtEintrag;
+use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
 
 #[test]
-fn test_caching() {
+fn test_cache() {
     let result1 = ZusiResult::builder()
         .datum(datetime!(2019-01-01 23:14))
         .value(vec![
@@ -77,14 +76,14 @@ fn test_caching() {
 
 #[test]
 fn test_create_analyser_group_from_ref() {
-    let analyser = ResultAnalyser::new(
+    let mut analyser = ResultAnalyser::new(
         ZusiResult::builder()
             .datum(datetime!(2019-01-01 23:14))
             .value(vec![])
             .build()
     );
     let _analyser_group = ResultAnalyserGroup::new(vec![
-        &analyser
+        &mut analyser
     ]);
 }
 
@@ -555,8 +554,7 @@ fn test_try_from_results() {
 #[test]
 fn test_try_from_zero_results() {
     assert_eq!(
-        ResultAnalyserGroup::try_from(vec![])
-            as Result<ResultAnalyserGroup<ResultAnalyser<ZusiResult>, ZusiResult>, CreateAnalyserGroupError>,
+        ResultAnalyserGroup::try_from(vec![]) as Result<ResultAnalyserGroup<_ , ZusiResult>, CreateAnalyserGroupError>,
         Err(CreateAnalyserGroupError::NoAnalysers),
     );
 }

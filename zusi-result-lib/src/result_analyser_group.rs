@@ -21,7 +21,7 @@ pub struct ResultAnalyserGroup<A, R> {
     _phantom: PhantomData<R>,
 }
 
-impl<A: AsRef<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R> {
+impl<A: AsMut<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R> {
     pub fn new(analysers: Vec<A>) -> Result<ResultAnalyserGroup<A, R>, CreateAnalyserGroupError> {
         if analysers.len() == 0 {
             Err(CreateAnalyserGroupError::NoAnalysers)
@@ -45,8 +45,8 @@ impl<A: AsRef<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
 
         let mut total_distance = 0.;
 
-        for analyser in self.analysers.iter() {
-            total_distance += analyser.as_ref().distance()?;
+        for analyser in self.analysers.iter_mut() {
+            total_distance += analyser.as_mut().distance()?;
         }
 
         self.cache.total_distance = Some(total_distance);
@@ -78,8 +78,8 @@ impl<A: AsRef<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
         }
 
         let mut weighted_speed_sum = 0.;
-        for analyser in self.analysers.iter() {
-            weighted_speed_sum += analyser.as_ref().distance()? * analyser.as_ref().average_speed()?;
+        for analyser in self.analysers.iter_mut() {
+            weighted_speed_sum += analyser.as_mut().distance()? * analyser.as_mut().average_speed()?;
         }
 
         let average_speed = weighted_speed_sum / self.total_distance()?;
@@ -104,8 +104,8 @@ impl<A: AsRef<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
         };
 
         let mut weighted_speed_sum = 0.;
-        for analyser in self.analysers.iter() {
-            weighted_speed_sum += analyser.as_ref().distance()? * analyser.as_ref().pure_average_speed(algorithm)?;
+        for analyser in self.analysers.iter_mut() {
+            weighted_speed_sum += analyser.as_mut().distance()? * analyser.as_mut().pure_average_speed(algorithm)?;
         }
 
         let pure_average_speed = weighted_speed_sum / self.total_distance()?;
@@ -130,8 +130,8 @@ impl<A: AsRef<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
 
         let mut total_driving_time = Duration::seconds(0);
 
-        for analyser in self.analysers.iter() {
-            total_driving_time += analyser.as_ref().driving_time()?;
+        for analyser in self.analysers.iter_mut() {
+            total_driving_time += analyser.as_mut().driving_time()?;
         }
 
         self.cache.total_driving_time = Some(total_driving_time);
@@ -149,8 +149,8 @@ impl<A: AsRef<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
 
         let mut total_pure_driving_time = Duration::seconds(0);
 
-        for analyser in self.analysers.iter() {
-            total_pure_driving_time += analyser.as_ref().pure_driving_time()?;
+        for analyser in self.analysers.iter_mut() {
+            total_pure_driving_time += analyser.as_mut().pure_driving_time()?;
         }
 
         self.cache.total_pure_driving_time = Some(total_pure_driving_time);
