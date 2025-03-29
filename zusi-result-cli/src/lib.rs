@@ -4,7 +4,7 @@ use std::fs::File;
 use std::io;
 use std::io::Read;
 use std::path::PathBuf;
-
+use colored::Colorize;
 use crate::cli::AnalyseFilesArgs;
 use glob::{glob, PatternError};
 use zusi_result_lib::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm, ResultAnalyser};
@@ -128,7 +128,7 @@ fn print_analysis(results: Vec<ZusiResult>) -> Result<(), PrintAnalysisError> {
         let mut analyser = ResultAnalyser::new(results.first().unwrap());
         let schedule = analyser.schedule()?;
 
-        println!("Schedule:");
+        println!("{}", "Schedule:".bold());
         println!();
 
         println!("{schedule}");
@@ -136,7 +136,7 @@ fn print_analysis(results: Vec<ZusiResult>) -> Result<(), PrintAnalysisError> {
 
     let mut analyser_group: ResultAnalyserGroup<_, _> = results.try_into()?;
 
-    println!("Analysis results:");
+    println!("{}", "Analysis results:".bold());
     println!();
 
     println!("total distance:          {} m", analyser_group.total_distance()?);
