@@ -1,6 +1,6 @@
 use time::macros::datetime;
 use time::Duration;
-use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::FahrtEintrag;
+use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::{FahrtEintrag, FahrtTyp};
 use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
 
 use crate::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm, ResultAnalyser};
@@ -381,4 +381,52 @@ fn test_pure_driving_time_0() {
 
     let mut analyser = ResultAnalyser::new(result);
     assert_eq!(analyser.pure_driving_time(), Err(AnalyseError::NoEntries));
+}
+
+#[test]
+fn test_schedule() {
+    let result = ZusiResult::builder()
+        .datum(datetime!(2019-01-01 23:14))
+        .value(vec![
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_zeit(datetime!(2019-01-01 23:18:04))
+                .fahrt_speed(2.)
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_typ(FahrtTyp::Planhalt)
+                .fahrt_zeit(datetime!(2019-01-01 23:18:06))
+                .fahrt_speed(0.)
+                .fahrt_fpl_ank(Some(datetime!(2019-01-01 23:17:00).into()))
+                .fahrt_fpl_abf(Some(datetime!(2019-01-01 23:17:30).into()))
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_zeit(datetime!(2019-01-01 23:18:26))
+                .fahrt_speed(0.)
+                .fahrt_fpl_ank(Some(datetime!(2019-01-01 23:17:00).into()))
+                .fahrt_fpl_abf(Some(datetime!(2019-01-01 23:17:30).into()))
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_zeit(datetime!(2019-01-01 23:18:34))
+                .fahrt_speed(1.)
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_typ(FahrtTyp::Planhalt)
+                .fahrt_zeit(datetime!(2019-01-01 23:19:36))
+                .fahrt_speed(0.)
+                .fahrt_fpl_ank(Some(datetime!(2019-01-01 23:19:00).into()))
+                .fahrt_fpl_abf(Some(datetime!(2019-01-01 23:19:30).into()))
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_zeit(datetime!(2019-01-01 23:19:56))
+                .fahrt_speed(3.)
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_typ(FahrtTyp::Planhalt)
+                .fahrt_zeit(datetime!(2019-01-01 23:22:50))
+                .fahrt_speed(3.)
+                .build()),
+        ])
+        .build();
+
+    let mut analyser = ResultAnalyser::new(result);
 }

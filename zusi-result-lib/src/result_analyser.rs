@@ -2,11 +2,13 @@ use crate::result_analyser::helpers::filter_valid_fahrt_weg_and_fahrt_speed;
 use time::Duration;
 use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
 use crate::result_analyser::analyser_cache::AnalyserCache;
+use crate::result_analyser::schedule_entry::ScheduleEntry;
 
 #[cfg(test)]
 mod tests;
 mod helpers;
 mod analyser_cache;
+mod schedule_entry;
 
 #[derive(PartialEq, Debug)]
 pub enum AnalyseError {
@@ -193,6 +195,12 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
         } else {
             Err(AnalyseError::NoEntries)
         }
+    }
+
+    pub fn schedule(&mut self) -> Result<Vec<ScheduleEntry>, AnalyseError> {
+        // TODO: use cache
+
+        Ok(vec![])
     }
 }
 

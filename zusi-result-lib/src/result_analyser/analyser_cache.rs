@@ -1,4 +1,5 @@
 use time::Duration;
+use crate::result_analyser::schedule_entry::ScheduleEntry;
 
 #[derive(PartialEq, Debug)]
 pub struct AnalyserCache {
@@ -8,6 +9,7 @@ pub struct AnalyserCache {
     pub pure_average_speed_by_weighted_local_speeds: Option<f32>,
     pub driving_time: Option<Duration>,
     pub pure_driving_time: Option<Duration>,
+    pub schedule: Option<Vec<ScheduleEntry>>,
 }
 
 impl AnalyserCache {
@@ -19,6 +21,7 @@ impl AnalyserCache {
             pure_average_speed_by_weighted_local_speeds: None,
             driving_time: None,
             pure_driving_time: None,
+            schedule: None,
         }
     }
 }
