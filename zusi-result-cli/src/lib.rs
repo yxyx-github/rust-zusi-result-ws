@@ -53,7 +53,6 @@ pub fn analyse_files(args: AnalyseFilesArgs) -> Result<(), AnalyseFilesError> {
     }
 
     println!();
-    println!("Analysis results:");
     print_analysis(results)?;
     Ok(())
 }
@@ -129,22 +128,28 @@ fn print_analysis(results: Vec<ZusiResult>) -> Result<(), PrintAnalysisError> {
         let mut analyser = ResultAnalyser::new(results.first().unwrap());
         let schedule = analyser.schedule()?;
 
+        println!("Schedule:");
+        println!();
+
         println!("{schedule}");
     }
 
     let mut analyser_group: ResultAnalyserGroup<_, _> = results.try_into()?;
 
-    println!("total distance: {} m", analyser_group.total_distance()?);
+    println!("Analysis results:");
+    println!();
 
-    println!("average distance: {} m", analyser_group.average_distance()?);
+    println!("total distance:          {} m", analyser_group.total_distance()?);
+
+    println!("average distance:        {} m", analyser_group.average_distance()?);
 
     let average_speed = analyser_group.average_speed()?;
-    println!("average speed: {} m/s = {} km/h", average_speed, average_speed * 3.6);
+    println!("average speed:           {} m/s = {} km/h", average_speed, average_speed * 3.6);
 
     let pure_average_speed = analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::default())?;
-    println!("pure average speed: {} m/s = {} km/h", pure_average_speed, pure_average_speed * 3.6);
+    println!("pure average speed:      {} m/s = {} km/h", pure_average_speed, pure_average_speed * 3.6);
 
-    println!("total driving time: {}", analyser_group.total_driving_time()?);
+    println!("total driving time:      {}", analyser_group.total_driving_time()?);
 
     println!("total pure driving time: {}", analyser_group.total_pure_driving_time()?);
 
