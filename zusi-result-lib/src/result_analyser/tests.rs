@@ -4,6 +4,7 @@ use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::{FahrtEintrag, FahrtTyp};
 use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
 
 use crate::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm, ResultAnalyser};
+use crate::result_analyser::schedule_entry::ScheduleEntry;
 
 #[test]
 fn test_cache() {
@@ -26,9 +27,13 @@ fn test_cache() {
                 .fahrt_speed(5.)
                 .build()),
             ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_typ(FahrtTyp::Planhalt)
                 .fahrt_weg(165.)
                 .fahrt_zeit(datetime!(2019-01-01 23:18:34))
                 .fahrt_speed(0.)
+                .fahrt_text("Station".into())
+                .fahrt_fpl_ank(Some(datetime!(2019-01-01 23:18:30).into()))
+                .fahrt_fpl_abf(Some(datetime!(2019-01-01 23:19:00).into()))
                 .build()),
             ResultValue::FahrtEintrag(FahrtEintrag::builder()
                 .fahrt_weg(165.)
@@ -52,6 +57,15 @@ fn test_cache() {
         assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 4.8);
         assert_eq!(analyser.driving_time().unwrap(), Duration::seconds(112));
         assert_eq!(analyser.pure_driving_time().unwrap(), Duration::seconds(50));
+        assert_eq!(analyser.schedule().unwrap(), vec![
+            ScheduleEntry {
+                planned_arrival: datetime!(2019-01-01 23:18:30),
+                planned_departure: datetime!(2019-01-01 23:19:00),
+                actual_arrival: datetime!(2019-01-01 23:18:34),
+                actual_departure: datetime!(2019-01-01 23:19:56),
+                name: "Station".into(),
+            },
+        ]);
     }
 }
 
@@ -396,12 +410,14 @@ fn test_schedule() {
                 .fahrt_typ(FahrtTyp::Planhalt)
                 .fahrt_zeit(datetime!(2019-01-01 23:18:06))
                 .fahrt_speed(0.)
+                .fahrt_text("CityA".into())
                 .fahrt_fpl_ank(Some(datetime!(2019-01-01 23:17:00).into()))
                 .fahrt_fpl_abf(Some(datetime!(2019-01-01 23:17:30).into()))
                 .build()),
             ResultValue::FahrtEintrag(FahrtEintrag::builder()
                 .fahrt_zeit(datetime!(2019-01-01 23:18:26))
                 .fahrt_speed(0.)
+                .fahrt_text("ignored City".into())
                 .fahrt_fpl_ank(Some(datetime!(2019-01-01 23:17:00).into()))
                 .fahrt_fpl_abf(Some(datetime!(2019-01-01 23:17:30).into()))
                 .build()),
@@ -413,6 +429,7 @@ fn test_schedule() {
                 .fahrt_typ(FahrtTyp::Planhalt)
                 .fahrt_zeit(datetime!(2019-01-01 23:19:36))
                 .fahrt_speed(0.)
+                .fahrt_text("CityB".into())
                 .fahrt_fpl_ank(Some(datetime!(2019-01-01 23:19:00).into()))
                 .fahrt_fpl_abf(Some(datetime!(2019-01-01 23:19:30).into()))
                 .build()),
@@ -429,4 +446,21 @@ fn test_schedule() {
         .build();
 
     let mut analyser = ResultAnalyser::new(result);
+
+    assert_eq!(analyser.schedule().unwrap(), vec![
+        ScheduleEntry {
+            planned_arrival: datetime!(2019-01-01 23:17:00),
+            planned_departure: datetime!(2019-01-01 23:17:30),
+            actual_arrival: datetime!(2019-01-01 23:18:06),
+            actual_departure: datetime!(2019-01-01 23:18:34),
+            name: "CityA".into(),
+        },
+        ScheduleEntry {
+            planned_arrival: datetime!(2019-01-01 23:19:00),
+            planned_departure: datetime!(2019-01-01 23:19:30),
+            actual_arrival: datetime!(2019-01-01 23:19:36),
+            actual_departure: datetime!(2019-01-01 23:19:56),
+            name: "CityB".into(),
+        },
+    ]);
 }

@@ -1,8 +1,9 @@
-use crate::result_analyser::helpers::filter_valid_fahrt_weg_and_fahrt_speed;
-use time::Duration;
-use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
 use crate::result_analyser::analyser_cache::AnalyserCache;
+use crate::result_analyser::helpers::{filter_valid_fahrt_weg_and_fahrt_speed, round_primitive_date_time};
 use crate::result_analyser::schedule_entry::ScheduleEntry;
+use time::Duration;
+use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::FahrtTyp;
+use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
 
 #[cfg(test)]
 mod tests;
@@ -198,9 +199,47 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
     }
 
     pub fn schedule(&mut self) -> Result<Vec<ScheduleEntry>, AnalyseError> {
-        // TODO: use cache
+        if let Some(value) = &self.cache.schedule {
+            return Ok((*value).clone());
+        }
 
-        Ok(vec![])
+        let result = self.result.as_ref();
+
+        let schedule = filter_valid_fahrt_weg_and_fahrt_speed(result).into_iter().fold(
+            (vec![], false),
+            |(mut schedule, mut missing_departure), ResultValue::FahrtEintrag(fahrt_eintrag)| {
+                match (
+                    &fahrt_eintrag.fahrt_typ,
+                    &fahrt_eintrag.fahrt_zeit,
+                    &fahrt_eintrag.fahrt_fpl_ank,
+                    &fahrt_eintrag.fahrt_fpl_abf,
+                    &fahrt_eintrag.fahrt_text,
+                    &fahrt_eintrag.fahrt_speed,
+                ) {
+                    (FahrtTyp::Planhalt, fahrt_zeit, Some(ank), Some(abf), text, _) => {
+                        schedule.push(ScheduleEntry {
+                            planned_arrival: round_primitive_date_time((*ank).into()),
+                            planned_departure: round_primitive_date_time((*abf).into()),
+                            actual_arrival: fahrt_zeit.clone(),
+                            actual_departure: round_primitive_date_time((*abf).into()),
+                            name: text.clone(),
+                        });
+                        missing_departure = true;
+                    }
+                    (_, fahrt_zeit, _, _, _, speed) if *speed > 0. && missing_departure == true => {
+                        if let Some(entry) = schedule.last_mut() {
+                            entry.actual_departure = fahrt_zeit.clone();
+                            missing_departure = false;
+                        }
+                    }
+                    _ => {}
+                };
+                (schedule, missing_departure)
+            }
+        ).0;
+
+        self.cache.schedule = Some(schedule.clone());
+        Ok(schedule)
     }
 }
 
