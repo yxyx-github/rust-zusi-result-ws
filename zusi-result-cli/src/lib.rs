@@ -7,7 +7,7 @@ use std::path::PathBuf;
 
 use crate::cli::AnalyseFilesArgs;
 use glob::{glob, PatternError};
-use zusi_result_lib::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm};
+use zusi_result_lib::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm, ResultAnalyser};
 use zusi_result_lib::result_analyser_group::{CreateAnalyserGroupError, ResultAnalyserGroup};
 use zusi_xml_lib::xml::zusi::result::ZusiResult;
 use zusi_xml_lib::xml::zusi::{DeError, Zusi, ZusiValue};
@@ -125,6 +125,13 @@ impl From<CreateAnalyserGroupError> for PrintAnalysisError {
 }
 
 fn print_analysis(results: Vec<ZusiResult>) -> Result<(), PrintAnalysisError> {
+    if results.len() == 1 {
+        let mut analyser = ResultAnalyser::new(results.first().unwrap());
+        let schedule = analyser.schedule()?;
+
+        println!("{schedule}");
+    }
+
     let mut analyser_group: ResultAnalyserGroup<_, _> = results.try_into()?;
 
     println!("total distance: {} m", analyser_group.total_distance()?);

@@ -1,6 +1,6 @@
 use crate::result_analyser::analyser_cache::AnalyserCache;
 use crate::result_analyser::helpers::{filter_valid_fahrt_weg_and_fahrt_speed, round_primitive_date_time};
-use crate::result_analyser::schedule_entry::ScheduleEntry;
+use crate::result_analyser::schedule::{Schedule, ScheduleEntry};
 use time::Duration;
 use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::FahrtTyp;
 use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
@@ -9,7 +9,7 @@ use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
 mod tests;
 mod helpers;
 mod analyser_cache;
-mod schedule_entry;
+mod schedule;
 
 #[derive(PartialEq, Debug)]
 pub enum AnalyseError {
@@ -198,16 +198,16 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
         }
     }
 
-    pub fn schedule(&mut self) -> Result<Vec<ScheduleEntry>, AnalyseError> {
+    pub fn schedule(&mut self) -> Result<Schedule, AnalyseError> {
         if let Some(value) = &self.cache.schedule {
             return Ok((*value).clone());
         }
 
         let result = self.result.as_ref();
 
-        let schedule = filter_valid_fahrt_weg_and_fahrt_speed(result).into_iter().fold(
+        let schedule: Schedule = filter_valid_fahrt_weg_and_fahrt_speed(result).into_iter().fold(
             (vec![], false),
-            |(mut schedule, mut missing_departure), ResultValue::FahrtEintrag(fahrt_eintrag)| {
+            |(mut entries, mut missing_departure), ResultValue::FahrtEintrag(fahrt_eintrag)| {
                 match (
                     &fahrt_eintrag.fahrt_typ,
                     &fahrt_eintrag.fahrt_zeit,
@@ -217,7 +217,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
                     &fahrt_eintrag.fahrt_speed,
                 ) {
                     (FahrtTyp::Planhalt, fahrt_zeit, Some(ank), Some(abf), text, _) => {
-                        schedule.push(ScheduleEntry {
+                        entries.push(ScheduleEntry {
                             planned_arrival: round_primitive_date_time((*ank).into()),
                             planned_departure: round_primitive_date_time((*abf).into()),
                             actual_arrival: fahrt_zeit.clone(),
@@ -227,16 +227,16 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
                         missing_departure = true;
                     }
                     (_, fahrt_zeit, _, _, _, speed) if *speed > 0. && missing_departure == true => {
-                        if let Some(entry) = schedule.last_mut() {
+                        if let Some(entry) = entries.last_mut() {
                             entry.actual_departure = fahrt_zeit.clone();
                             missing_departure = false;
                         }
                     }
                     _ => {}
                 };
-                (schedule, missing_departure)
+                (entries, missing_departure)
             }
-        ).0;
+        ).0.into();
 
         self.cache.schedule = Some(schedule.clone());
         Ok(schedule)

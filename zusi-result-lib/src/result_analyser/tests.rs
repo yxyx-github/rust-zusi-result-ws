@@ -4,7 +4,7 @@ use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::{FahrtEintrag, FahrtTyp};
 use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
 
 use crate::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm, ResultAnalyser};
-use crate::result_analyser::schedule_entry::ScheduleEntry;
+use crate::result_analyser::schedule::{Schedule, ScheduleEntry};
 
 #[test]
 fn test_cache() {
@@ -57,7 +57,7 @@ fn test_cache() {
         assert_eq!(analyser.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 4.8);
         assert_eq!(analyser.driving_time().unwrap(), Duration::seconds(112));
         assert_eq!(analyser.pure_driving_time().unwrap(), Duration::seconds(50));
-        assert_eq!(analyser.schedule().unwrap(), vec![
+        assert_eq!(analyser.schedule().unwrap(), Schedule::from(vec![
             ScheduleEntry {
                 planned_arrival: datetime!(2019-01-01 23:18:30),
                 planned_departure: datetime!(2019-01-01 23:19:00),
@@ -65,7 +65,7 @@ fn test_cache() {
                 actual_departure: datetime!(2019-01-01 23:19:56),
                 name: "Station".into(),
             },
-        ]);
+        ]));
     }
 }
 
@@ -447,7 +447,7 @@ fn test_schedule() {
 
     let mut analyser = ResultAnalyser::new(result);
 
-    assert_eq!(analyser.schedule().unwrap(), vec![
+    assert_eq!(analyser.schedule().unwrap(), Schedule::from(vec![
         ScheduleEntry {
             planned_arrival: datetime!(2019-01-01 23:17:00),
             planned_departure: datetime!(2019-01-01 23:17:30),
@@ -462,5 +462,5 @@ fn test_schedule() {
             actual_departure: datetime!(2019-01-01 23:19:56),
             name: "CityB".into(),
         },
-    ]);
+    ]));
 }
