@@ -90,7 +90,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
     ///
     /// Throws [AnalyseError::NoEntries] if the [ZusiResult] does not contain any [FahrtEintrag](ResultValue::FahrtEintrag) entries.
     /// Throws [AnalyseError::ZeroDrivingTime] if the time driven is zero.
-    pub fn pure_average_speed_by_pure_driving_time(&mut self) -> Result<f32, AnalyseError> {
+    fn pure_average_speed_by_pure_driving_time(&mut self) -> Result<f32, AnalyseError> {
         if let Some(value) = &self.cache.pure_average_speed_by_pure_driving_time {
             return Ok(*value);
         }
@@ -113,7 +113,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
     ///
     /// Throws [AnalyseError::NoEntries] if the [ZusiResult] does not contain any [FahrtEintrag](ResultValue::FahrtEintrag) entries.
     /// Throws [AnalyseError::ZeroDistance] if the distance driven is zero.
-    pub fn pure_average_speed_by_weighted_local_speeds(&mut self) -> Result<f32, AnalyseError> {
+    fn pure_average_speed_by_weighted_local_speeds(&mut self) -> Result<f32, AnalyseError> {
         if let Some(value) = &self.cache.pure_average_speed_by_weighted_local_speeds {
             return Ok(*value);
         }
