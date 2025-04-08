@@ -79,10 +79,10 @@ impl<A: AsMut<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
 
         let mut weighted_speed_sum = 0.;
         for analyser in self.analysers.iter_mut() {
-            weighted_speed_sum += analyser.as_mut().distance()? * analyser.as_mut().average_speed()?;
+            weighted_speed_sum += analyser.as_mut().driving_time()?.as_seconds_f32() * analyser.as_mut().average_speed()?;
         }
 
-        let average_speed = weighted_speed_sum / self.total_distance()?;
+        let average_speed = weighted_speed_sum / self.total_driving_time()?.as_seconds_f32();
 
         self.cache.average_speed = Some(average_speed);
         Ok(average_speed)
@@ -105,10 +105,10 @@ impl<A: AsMut<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
 
         let mut weighted_speed_sum = 0.;
         for analyser in self.analysers.iter_mut() {
-            weighted_speed_sum += analyser.as_mut().distance()? * analyser.as_mut().pure_average_speed(algorithm)?;
+            weighted_speed_sum += analyser.as_mut().pure_driving_time()?.as_seconds_f32() * analyser.as_mut().pure_average_speed(algorithm)?;
         }
 
-        let pure_average_speed = weighted_speed_sum / self.total_distance()?;
+        let pure_average_speed = weighted_speed_sum / self.total_pure_driving_time()?.as_seconds_f32();
 
         match algorithm {
             PureAverageSpeedAlgorithm::PureDrivingTime =>

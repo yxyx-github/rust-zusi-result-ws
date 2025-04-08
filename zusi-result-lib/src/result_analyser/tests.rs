@@ -119,6 +119,33 @@ fn test_distance_0() {
 }
 
 #[test]
+fn test_average_speed_3() {
+    let result = ZusiResult::builder()
+        .datum(datetime!(2019-01-01 23:14))
+        .value(vec![
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_weg(0.)
+                .fahrt_zeit(datetime!(2019-01-01 22:18))
+                .fahrt_speed(8.)
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_weg(2.)
+                .fahrt_zeit(datetime!(2019-01-01 22:28))
+                .fahrt_speed(0.)
+                .build()),
+            ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                .fahrt_weg(3_600.)
+                .fahrt_zeit(datetime!(2019-01-01 23:18))
+                .fahrt_speed(8.)
+                .build()),
+        ])
+        .build();
+
+    let mut analyser = ResultAnalyser::new(result);
+    assert_eq!(analyser.average_speed().unwrap(), 1.);
+}
+
+#[test]
 fn test_average_speed_2() {
     let result = ZusiResult::builder()
         .datum(datetime!(2019-01-01 23:14))

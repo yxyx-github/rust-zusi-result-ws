@@ -66,9 +66,9 @@ fn test_cache() {
     for _ in 0..2 {
         assert_eq!(analyser_group.total_distance().unwrap(), 20.);
         assert_eq!(analyser_group.average_distance().unwrap(), 10.);
-        assert_eq!(analyser_group.average_speed().unwrap(), 0.0065396824);
-        assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).unwrap(), 0.0092);
-        assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 3.7599998);
+        assert_eq!(analyser_group.average_speed().unwrap(), 0.0051282053);
+        assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).unwrap(), 0.0074074073);
+        assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 4.4444447);
         assert_eq!(analyser_group.total_driving_time().unwrap(), Duration::minutes(65));
         assert_eq!(analyser_group.total_pure_driving_time().unwrap(), Duration::minutes(45));
     }
@@ -267,7 +267,7 @@ fn test_average_speed_2() {
         ResultAnalyser::new(result2),
     ]).unwrap();
 
-    assert_eq!(analyser_group.average_speed().unwrap(), 3.);
+    assert_eq!(analyser_group.average_speed().unwrap(), 2.);
 }
 
 #[test]
@@ -349,8 +349,8 @@ fn test_pure_average_speed_2() {
         ResultAnalyser::new(result2),
     ]).unwrap();
 
-    assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).unwrap(), 24.);
-    assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 24.);
+    assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::PureDrivingTime).unwrap(), 16.);
+    assert_eq!(analyser_group.pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds).unwrap(), 16.);
 }
 
 #[test]
