@@ -77,15 +77,14 @@ impl<A: AsMut<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
             return Ok(*value);
         }
 
-        let mut weighted_speed_sum = 0.;
-        for analyser in self.analysers.iter_mut() {
-            weighted_speed_sum += analyser.as_mut().driving_time()?.as_seconds_f32() * analyser.as_mut().average_speed()?;
+        if self.total_driving_time()?.is_zero() {
+            Err(AnalyseError::ZeroDrivingTime)
+        } else {
+            let average_speed = self.total_distance()? / self.total_driving_time()?.as_seconds_f32();
+
+            self.cache.average_speed = Some(average_speed);
+            Ok(average_speed)
         }
-
-        let average_speed = weighted_speed_sum / self.total_driving_time()?.as_seconds_f32();
-
-        self.cache.average_speed = Some(average_speed);
-        Ok(average_speed)
     }
 
     /// Computes the average speed for all routes excluding idle times.
@@ -103,6 +102,7 @@ impl<A: AsMut<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
             _ => {}
         };
 
+        // TODO: use different algorithms
         let mut weighted_speed_sum = 0.;
         for analyser in self.analysers.iter_mut() {
             weighted_speed_sum += analyser.as_mut().pure_driving_time()?.as_seconds_f32() * analyser.as_mut().pure_average_speed(algorithm)?;

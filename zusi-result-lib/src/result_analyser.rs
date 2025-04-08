@@ -65,12 +65,10 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
             return Ok(*value);
         }
 
-        let distance = self.distance()?;
-        let driving_time = self.driving_time()?.as_seconds_f32();
-        if driving_time == 0.0 {
+        if self.driving_time()?.is_zero() {
             Err(AnalyseError::ZeroDrivingTime)
         } else {
-            let average_speed = distance / driving_time;
+            let average_speed = self.distance()? / self.driving_time()?.as_seconds_f32();
 
             self.cache.average_speed = Some(average_speed);
             Ok(average_speed)
