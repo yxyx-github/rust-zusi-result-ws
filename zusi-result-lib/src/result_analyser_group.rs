@@ -88,7 +88,7 @@ impl<A: AsMut<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
     }
 
     /// Computes the average speed for all routes excluding idle times.
-    /// The [algorithm](PureAverageSpeedAlgorithm) argument only affects the calculation of the single [analyzers](ResultAnalyser), not the [AnalyzerGroup](AnalyzerGroup) itself.
+    /// The [algorithm](PureAverageSpeedAlgorithm) argument only affects the calculation of the single [analyzers](ResultAnalyser), not the [AnalyzerGroup](ResultAnalyserGroup) itself.
     /// For more details see [pure_average_speed](ResultAnalyser::pure_average_speed)
     ///
     /// Errors will be propagated.
