@@ -69,7 +69,7 @@ impl<A: AsMut<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
     }
 
     /// Computes the average speed for all routes including idle times.
-    /// For more details see [distance](ResultAnalyser::average_speed).
+    /// For more details see [average_speed](ResultAnalyser::average_speed).
     ///
     /// Errors will be propagated.
     pub fn average_speed(&mut self) -> Result<f32, AnalyseError> {
@@ -88,39 +88,56 @@ impl<A: AsMut<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
     }
 
     /// Computes the average speed for all routes excluding idle times.
-    /// For more details see [distance](ResultAnalyser::pure_average_speed).
+    /// The [algorithm](PureAverageSpeedAlgorithm) argument only affects the calculation of the single [analyzers](ResultAnalyser), not the [AnalyzerGroup](AnalyzerGroup) itself.
+    /// For more details see [pure_average_speed](ResultAnalyser::pure_average_speed)
     ///
     /// Errors will be propagated.
     pub fn pure_average_speed(&mut self, algorithm: PureAverageSpeedAlgorithm) -> Result<f32, AnalyseError> {
-        match (
-            algorithm,
-            &self.cache.pure_average_speed_by_pure_driving_time,
-            &self.cache.pure_average_speed_by_weighted_local_speeds,
-        ) {
-            (PureAverageSpeedAlgorithm::PureDrivingTime, Some(value), _) => return Ok(*value),
-            (PureAverageSpeedAlgorithm::WeightedLocalSpeeds, _, Some(value)) => return Ok(*value),
-            _ => {}
-        };
+        match algorithm {
+            PureAverageSpeedAlgorithm::PureDrivingTime => self.pure_average_speed_by_pure_driving_time(),
+            PureAverageSpeedAlgorithm::WeightedLocalSpeeds => self.pure_average_speed_by_weighted_local_speeds(),
+        }
+    }
 
-        // TODO: use different algorithms
+    /// Computes the average speed for all routes excluding idle times using the [PureDrivingTime](PureAverageSpeedAlgorithm::PureDrivingTime) algorithm.
+    ///
+    /// Errors will be propagated.
+    fn pure_average_speed_by_pure_driving_time(&mut self) -> Result<f32, AnalyseError> {
+        if let Some(value) = &self.cache.pure_average_speed_by_pure_driving_time {
+            return Ok(*value);
+        }
+
+        if self.total_pure_driving_time()?.is_zero() {
+            Err(AnalyseError::ZeroDrivingTime)
+        } else {
+            let pure_average_speed = self.total_distance()? / self.total_pure_driving_time()?.as_seconds_f32();
+
+            self.cache.pure_average_speed_by_pure_driving_time = Some(pure_average_speed);
+            Ok(pure_average_speed)
+        }
+    }
+
+    /// Computes the average speed for all routes excluding idle times using the [WeightedLocalSpeeds](PureAverageSpeedAlgorithm::WeightedLocalSpeeds) algorithm.
+    ///
+    /// Errors will be propagated.
+    fn pure_average_speed_by_weighted_local_speeds(&mut self) -> Result<f32, AnalyseError> {
+        if let Some(value) = &self.cache.pure_average_speed_by_weighted_local_speeds {
+            return Ok(*value);
+        }
+
         let mut weighted_speed_sum = 0.;
         for analyser in self.analysers.iter_mut() {
-            weighted_speed_sum += analyser.as_mut().pure_driving_time()?.as_seconds_f32() * analyser.as_mut().pure_average_speed(algorithm)?;
+            weighted_speed_sum += analyser.as_mut().pure_driving_time()?.as_seconds_f32() * analyser.as_mut().pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds)?;
         }
 
         let pure_average_speed = weighted_speed_sum / self.total_pure_driving_time()?.as_seconds_f32();
 
-        match algorithm {
-            PureAverageSpeedAlgorithm::PureDrivingTime =>
-                self.cache.pure_average_speed_by_pure_driving_time = Some(pure_average_speed),
-            PureAverageSpeedAlgorithm::WeightedLocalSpeeds =>
-                self.cache.pure_average_speed_by_weighted_local_speeds = Some(pure_average_speed),
-        }
+        self.cache.pure_average_speed_by_weighted_local_speeds = Some(pure_average_speed);
         Ok(pure_average_speed)
     }
 
     /// Computes the sum of the driving times including idle times for all routes.
-    /// For more details see [distance](ResultAnalyser::driving_time).
+    /// For more details see [driving_time](ResultAnalyser::driving_time).
     ///
     /// Errors will be propagated.
     pub fn total_driving_time(&mut self) -> Result<Duration, AnalyseError> {
@@ -139,7 +156,7 @@ impl<A: AsMut<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
     }
 
     /// Computes the sum of the driving times excluding idle times for all routes.
-    /// For more details see [distance](ResultAnalyser::pure_driving_time).
+    /// For more details see [pure_driving_time](ResultAnalyser::pure_driving_time).
     ///
     /// Errors will be propagated.
     pub fn total_pure_driving_time(&mut self) -> Result<Duration, AnalyseError> {

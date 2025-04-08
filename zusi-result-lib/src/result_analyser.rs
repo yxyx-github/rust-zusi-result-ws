@@ -86,7 +86,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
         }
     }
 
-    /// Computes the average speed excluding idle times.
+    /// Computes the average speed excluding idle times using the [pure_driving_time](ResultAnalyser::pure_driving_time).
     ///
     /// Throws [AnalyseError::NoEntries] if the [ZusiResult] does not contain any [FahrtEintrag](ResultValue::FahrtEintrag) entries.
     /// Throws [AnalyseError::ZeroDrivingTime] if the time driven is zero.
