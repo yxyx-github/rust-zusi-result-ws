@@ -1,0 +1,1 @@
+export type Threshold = 'mb' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'

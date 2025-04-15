@@ -1,85 +1,47 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+    <PageRoot>
+        <Column :gap="0" grow class="h-full">
+            <TitleBar class="z-10">
+                <template #left v-if="pageName !== 'home'">
+                    <WebHistoryNavigation homeRouteName="home"/>
+                </template>
+                <PageTitle appName="UI-Component-Lib" :pageName="pageName"/>
+                <template #right>
+                    <MenuBar :items="menuItems" preferredXDirection="left" severity="warning"/>
+                </template>
+            </TitleBar>
+            <ContentBox direction="col" grow shrink class="z-0 overflow-auto">
+                <MessageLocationViewer location=""/>
+                <RouterView/>
+            </ContentBox>
+        </Column>
+    </PageRoot>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
+<script setup lang="ts">
+import PageRoot from '@/c-lib/components/core/containers/PageRoot.vue'
+import Column from '@/c-lib/components/core/layout/Column.vue'
+import ContentBox from '@/c-lib/components/core/layout/ContentBox.vue'
+import TitleBar from '@/c-lib/components/widgets/navigation/TitleBar.vue'
+import PageTitle from '@/c-lib/components/widgets/navigation/PageTitle.vue'
+import MenuBar from '@/c-lib/components/core/menus/bar/MenuBar.vue'
+import type { MenuItem } from '@/c-lib/types/menu.ts'
+import { useRouter } from 'vue-router'
+import WebHistoryNavigation from '@/c-lib/components/widgets/navigation/WebHistoryNavigation.vue'
+import { computed } from 'vue'
+import MessageLocationViewer from '@/c-lib/components/core/messages/messageViewers/MessageLocationViewer.vue'
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
+const router = useRouter()
 
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
+const menuItems: MenuItem[] = [
+    { label: 'Go to', icon: 'chevron-down', showLabel: null, severity: 'primary', children: [
+            { label: 'TestItemA', onClick: () => router.push({ name: 'testa' }) },
+            { label: 'TestItemB', onClick: () => router.push({ name: 'testb' }) },
+            { label: 'TestItemC', onClick: () => router.push({ name: 'testc' }) },
+        ] },
+    { label: 'TestA ...........................', icon: 'home', showLabel: null, onClick: () => router.push({ name: 'home' }) },
+    { label: 'TestB', icon: 'home', showLabel: false, onClick: () => router.push({ name: 'home' }) },
+]
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
-</style>
+const pageName = computed<string>(() => (router.currentRoute.value.name ?? '') as string)
+</script>
