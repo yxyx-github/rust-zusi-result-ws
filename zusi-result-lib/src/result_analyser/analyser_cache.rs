@@ -1,5 +1,6 @@
 use crate::result_analyser::schedule::Schedule;
 use time::Duration;
+use crate::result_analyser::charts::chart_data::ChartData;
 
 #[derive(PartialEq, Debug)]
 pub struct AnalyserCache {
@@ -10,6 +11,7 @@ pub struct AnalyserCache {
     pub driving_time: Option<Duration>,
     pub pure_driving_time: Option<Duration>,
     pub schedule: Option<Schedule>,
+    pub chart_data: Option<ChartData>,
 }
 
 impl AnalyserCache {
@@ -22,6 +24,7 @@ impl AnalyserCache {
             driving_time: None,
             pure_driving_time: None,
             schedule: None,
+            chart_data: None,
         }
     }
 }

@@ -4,12 +4,14 @@ use crate::result_analyser::schedule::{Schedule, ScheduleEntry};
 use time::Duration;
 use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::FahrtTyp;
 use zusi_xml_lib::xml::zusi::result::ZusiResult;
+use crate::result_analyser::charts::chart_data::{ChartData, ChartDataEntry};
 
 #[cfg(test)]
 mod tests;
 mod helpers;
 mod analyser_cache;
 mod schedule;
+mod charts;
 
 #[derive(PartialEq, Debug)]
 pub enum AnalyseError {
@@ -238,6 +240,33 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
 
         self.cache.schedule = Some(schedule.clone());
         Ok(schedule)
+    }
+
+    pub fn chart_data(&mut self) -> Result<ChartData, AnalyseError> {
+        if let Some(value) = &self.cache.chart_data {
+            return Ok((*value).clone());
+        }
+
+        let result = self.result.as_ref();
+
+        let chart_data: ChartData = filter_valid_fahrt_weg_and_fahrt_speed(result).into_iter().fold(
+            vec![],
+            |mut entries, fahrt_eintrag| {
+                entries.push(ChartDataEntry {
+                    distance: fahrt_eintrag.fahrt_weg,
+                    time: fahrt_eintrag.fahrt_zeit,
+                    km: fahrt_eintrag.fahrt_km,
+                    actual_speed: fahrt_eintrag.fahrt_speed,
+                    track_speed_limit: if fahrt_eintrag.fahrt_speed_strecke == -1. { None } else { Some(fahrt_eintrag.fahrt_speed_strecke) },
+                    signal_speed_limit: if fahrt_eintrag.fahrt_speed_signal == -1. { None } else { Some(fahrt_eintrag.fahrt_speed_signal) },
+                    train_control_system_speed_limit: if fahrt_eintrag.fahrt_speed_zugsicherung == -1. { None } else { Some(fahrt_eintrag.fahrt_speed_zugsicherung) },
+                });
+                entries
+            }
+        ).into();
+
+        self.cache.chart_data = Some(chart_data.clone());
+        Ok(chart_data)
     }
 }
 
