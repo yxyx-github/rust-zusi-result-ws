@@ -4,7 +4,7 @@ use crate::result_analyser::schedule::{Schedule, ScheduleEntry};
 use time::Duration;
 use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::FahrtTyp;
 use zusi_xml_lib::xml::zusi::result::ZusiResult;
-use crate::result_analyser::charts::chart_data::{ChartData, ChartDataEntry};
+use crate::result_analyser::charts::chart_data::{ChartData, ChartDataEntry, Speed};
 
 #[cfg(test)]
 mod tests;
@@ -256,10 +256,10 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
                     distance: fahrt_eintrag.fahrt_weg,
                     time: fahrt_eintrag.fahrt_zeit,
                     km: fahrt_eintrag.fahrt_km,
-                    actual_speed: fahrt_eintrag.fahrt_speed,
-                    track_speed_limit: if fahrt_eintrag.fahrt_speed_strecke == -1. { None } else { Some(fahrt_eintrag.fahrt_speed_strecke) },
-                    signal_speed_limit: if fahrt_eintrag.fahrt_speed_signal == -1. { None } else { Some(fahrt_eintrag.fahrt_speed_signal) },
-                    train_control_system_speed_limit: if fahrt_eintrag.fahrt_speed_zugsicherung == -1. { None } else { Some(fahrt_eintrag.fahrt_speed_zugsicherung) },
+                    actual_speed: Speed::from_meters_per_second(fahrt_eintrag.fahrt_speed),
+                    track_speed_limit: if fahrt_eintrag.fahrt_speed_strecke == -1. { None } else { Some(Speed::from_meters_per_second(fahrt_eintrag.fahrt_speed_strecke)) },
+                    signal_speed_limit: if fahrt_eintrag.fahrt_speed_signal == -1. { None } else { Some(Speed::from_meters_per_second(fahrt_eintrag.fahrt_speed_signal)) },
+                    train_control_system_speed_limit: if fahrt_eintrag.fahrt_speed_zugsicherung == -1. { None } else { Some(Speed::from_meters_per_second(fahrt_eintrag.fahrt_speed_zugsicherung)) },
                 });
                 entries
             }

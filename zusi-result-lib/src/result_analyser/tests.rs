@@ -4,7 +4,7 @@ use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::{FahrtEintrag, FahrtTyp};
 use zusi_xml_lib::xml::zusi::result::ZusiResult;
 
 use crate::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm, ResultAnalyser};
-use crate::result_analyser::charts::chart_data::{ChartData, ChartDataEntry};
+use crate::result_analyser::charts::chart_data::{ChartData, ChartDataEntry, Speed};
 use crate::result_analyser::schedule::{Schedule, ScheduleEntry};
 
 #[test]
@@ -553,8 +553,8 @@ fn test_chart_data() {
             distance: 0.,
             time: datetime!(2019-01-01 23:18:04),
             km: 3.7,
-            actual_speed: 0.,
-            track_speed_limit: Some(40.),
+            actual_speed: Speed::from_meters_per_second(0.),
+            track_speed_limit: Some(Speed::from_meters_per_second(40.)),
             signal_speed_limit: None,
             train_control_system_speed_limit: None,
         },
@@ -562,37 +562,37 @@ fn test_chart_data() {
             distance: 100.,
             time: datetime!(2019-01-01 23:18:24),
             km: 3.8,
-            actual_speed: 10.,
-            track_speed_limit: Some(40.),
-            signal_speed_limit: Some(20.),
-            train_control_system_speed_limit: Some(25.),
+            actual_speed: Speed::from_meters_per_second(10.),
+            track_speed_limit: Some(Speed::from_meters_per_second(40.)),
+            signal_speed_limit: Some(Speed::from_meters_per_second(20.)),
+            train_control_system_speed_limit: Some(Speed::from_meters_per_second(25.)),
         },
         ChartDataEntry {
             distance: 500.,
             time: datetime!(2019-01-01 23:18:44),
             km: 4.2,
-            actual_speed: 20.,
-            track_speed_limit: Some(30.),
-            signal_speed_limit: Some(20.),
-            train_control_system_speed_limit: Some(25.),
+            actual_speed: Speed::from_meters_per_second(20.),
+            track_speed_limit: Some(Speed::from_meters_per_second(30.)),
+            signal_speed_limit: Some(Speed::from_meters_per_second(20.)),
+            train_control_system_speed_limit: Some(Speed::from_meters_per_second(25.)),
         },
         ChartDataEntry {
             distance: 700.,
             time: datetime!(2019-01-01 23:18:54),
             km: 4.4,
-            actual_speed: 20.,
-            track_speed_limit: Some(30.),
-            signal_speed_limit: Some(20.),
-            train_control_system_speed_limit: Some(25.),
+            actual_speed: Speed::from_meters_per_second(20.),
+            track_speed_limit: Some(Speed::from_meters_per_second(30.)),
+            signal_speed_limit: Some(Speed::from_meters_per_second(20.)),
+            train_control_system_speed_limit: Some(Speed::from_meters_per_second(25.)),
         },
         ChartDataEntry {
             distance: 800.,
             time: datetime!(2019-01-01 23:19:04),
             km: 4.5,
-            actual_speed: 0.,
-            track_speed_limit: Some(30.),
-            signal_speed_limit: Some(20.),
-            train_control_system_speed_limit: Some(5.),
+            actual_speed: Speed::from_meters_per_second(0.),
+            track_speed_limit: Some(Speed::from_meters_per_second(30.)),
+            signal_speed_limit: Some(Speed::from_meters_per_second(20.)),
+            train_control_system_speed_limit: Some(Speed::from_meters_per_second(5.)),
         },
     ]));
 }
