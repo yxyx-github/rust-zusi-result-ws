@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter};
+
 pub mod chart_data;
 pub mod speed_distance_chart;
 
@@ -49,6 +51,12 @@ impl From<&str> for SVGString {
 impl From<SVGString> for String {
     fn from(value: SVGString) -> Self {
         value.0
+    }
+}
+
+impl Display for SVGString {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "{}", self.0)
     }
 }
 
