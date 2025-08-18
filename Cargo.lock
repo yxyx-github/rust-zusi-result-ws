@@ -5085,7 +5085,7 @@ dependencies = [
 
 [[package]]
 name = "zusi-result-gui"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "log",
  "serde",
@@ -5110,7 +5110,7 @@ dependencies = [
 name = "zusi-xml-lib"
 version = "0.6.0"
 dependencies = [
- "quick-xml 0.37.3",
+ "quick-xml 0.38.1",
  "serde",
  "time",
  "typed-builder",
