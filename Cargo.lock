@@ -169,9 +169,9 @@ dependencies = [
 
 [[package]]
 name = "quick-xml"
-version = "0.37.3"
+version = "0.38.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf763ab1c7a3aa408be466efc86efe35ed1bd3dd74173ed39d6b0d0a6f0ba148"
+checksum = "9845d9dccf565065824e69f9f235fafba1587031eda353c1f1561cd6a6be78f4"
 dependencies = [
  "memchr",
  "serde",
@@ -381,7 +381,7 @@ dependencies = [
 
 [[package]]
 name = "zusi-xml-lib"
-version = "0.5.7"
+version = "0.6.0"
 dependencies = [
  "quick-xml",
  "serde",

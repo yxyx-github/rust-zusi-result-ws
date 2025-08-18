@@ -1,13 +1,14 @@
 use time::{Duration, PrimitiveDateTime};
-use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
+use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::FahrtEintrag;
+use zusi_xml_lib::xml::zusi::result::ZusiResult;
 
-pub fn zusi_result_to_ptr_vec(result: &ZusiResult) -> Vec<&ResultValue> {
-    result.value.iter().map(|result_value| result_value).collect()
+pub fn result_to_fahrt_eintraege_ptr_vec(result: &ZusiResult) -> Vec<&FahrtEintrag> {
+    result.fahrt_eintraege.iter().map(|entry| entry).collect()
 }
 
-pub fn filter_valid_fahrt_weg_and_fahrt_speed(result: &ZusiResult) -> Vec<&ResultValue> {
-    zusi_result_to_ptr_vec(result).into_iter().filter(
-        |ResultValue::FahrtEintrag(fahrt_eintrag)|
+pub fn filter_valid_fahrt_weg_and_fahrt_speed(result: &ZusiResult) -> Vec<&FahrtEintrag> {
+    result_to_fahrt_eintraege_ptr_vec(result).into_iter().filter(
+        |fahrt_eintrag|
             fahrt_eintrag.fahrt_weg != -1. && fahrt_eintrag.fahrt_speed != -1.
     ).collect()
 }
@@ -27,43 +28,42 @@ pub fn round_primitive_date_time(pdt: PrimitiveDateTime) -> PrimitiveDateTime {
 mod tests {
     use super::*;
     use time::macros::datetime;
-    use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::FahrtEintrag;
 
     #[test]
     fn test_filter_valid_fahrt_weg_and_fahrt_speed() {
         let result = ZusiResult::builder()
             .datum(datetime!(2019-01-01 23:14))
-            .value(vec![
-                ResultValue::FahrtEintrag(FahrtEintrag::builder()
+            .fahrt_eintraege(vec![
+                FahrtEintrag::builder()
                     .fahrt_weg(-1.)
                     .fahrt_zeit(datetime!(2019-01-01 23:18))
-                    .build()),
-                ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                    .build(),
+                FahrtEintrag::builder()
                     .fahrt_weg(2.33)
                     .fahrt_zeit(datetime!(2019-01-01 23:18))
-                    .build()),
-                ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                    .build(),
+                FahrtEintrag::builder()
                     .fahrt_weg(-1.)
                     .fahrt_zeit(datetime!(2019-01-01 23:18))
                     .fahrt_speed(-1.)
-                    .build()),
-                ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                    .build(),
+                FahrtEintrag::builder()
                     .fahrt_weg(22.43)
                     .fahrt_zeit(datetime!(2019-01-01 23:18))
-                    .build()),
-                ResultValue::FahrtEintrag(FahrtEintrag::builder()
+                    .build(),
+                FahrtEintrag::builder()
                     .fahrt_weg(1.)
                     .fahrt_zeit(datetime!(2019-01-01 23:18))
                     .fahrt_speed(-1.)
-                    .build()),
+                    .build(),
             ])
             .build();
 
         assert_eq!(
             filter_valid_fahrt_weg_and_fahrt_speed(&result),
                 vec![
-                &result.value[1],
-                &result.value[3],
+                &result.fahrt_eintraege[1],
+                &result.fahrt_eintraege[3],
             ],
         )
     }

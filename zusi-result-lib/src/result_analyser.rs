@@ -3,7 +3,7 @@ use crate::result_analyser::helpers::{filter_valid_fahrt_weg_and_fahrt_speed, ro
 use crate::result_analyser::schedule::{Schedule, ScheduleEntry};
 use time::Duration;
 use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::FahrtTyp;
-use zusi_xml_lib::xml::zusi::result::{ResultValue, ZusiResult};
+use zusi_xml_lib::xml::zusi::result::ZusiResult;
 
 #[cfg(test)]
 mod tests;
@@ -43,11 +43,11 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
         let result = self.result.as_ref();
 
         // also need to filter fahrt_speed because of usage in pure_average_speed_by_pure_driving_time
-        let filtered_values = filter_valid_fahrt_weg_and_fahrt_speed(result);
+        let filtered_entries = filter_valid_fahrt_weg_and_fahrt_speed(result);
 
-        if filtered_values.len() > 0 {
-            let ResultValue::FahrtEintrag(first) = filtered_values.first().unwrap();
-            let ResultValue::FahrtEintrag(last) = filtered_values.last().unwrap();
+        if filtered_entries.len() > 0 {
+            let first = filtered_entries.first().unwrap();
+            let last = filtered_entries.last().unwrap();
             let distance = last.fahrt_weg - first.fahrt_weg;
 
             self.cache.distance = Some(distance);
@@ -129,8 +129,8 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
         } else if filtered_values.len() > 1 {
             let mut weighted_speed_sum = 0.;
             for i in 0..filtered_values.len() - 1 {
-                let ResultValue::FahrtEintrag(current) = filtered_values.get(i).unwrap();
-                let ResultValue::FahrtEintrag(next) = filtered_values.get(i + 1).unwrap();
+                let current = filtered_values.get(i).unwrap();
+                let next = filtered_values.get(i + 1).unwrap();
                 let local_average_speed = (current.fahrt_speed + next.fahrt_speed) / 2.;
                 let local_driving_time = next.fahrt_zeit - current.fahrt_zeit;
                 weighted_speed_sum += local_driving_time.as_seconds_f32() * local_average_speed;
@@ -153,9 +153,9 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
         }
 
         let result = self.result.as_ref();
-        if result.value.len() > 0 {
-            let ResultValue::FahrtEintrag(first) = result.value.first().unwrap();
-            let ResultValue::FahrtEintrag(last) = result.value.last().unwrap();
+        if result.fahrt_eintraege.len() > 0 {
+            let first = result.fahrt_eintraege.first().unwrap();
+            let last = result.fahrt_eintraege.last().unwrap();
             let driving_time = last.fahrt_zeit - first.fahrt_zeit;
 
             self.cache.driving_time = Some(driving_time);
@@ -181,15 +181,15 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
         if filtered_values.len() > 1 {
             let mut pure_driving_time = Duration::seconds(0);
             for i in 0..filtered_values.len() - 1 {
-                let ResultValue::FahrtEintrag(current) = filtered_values.get(i).unwrap();
-                let ResultValue::FahrtEintrag(next) = filtered_values.get(i + 1).unwrap();
+                let current = filtered_values.get(i).unwrap();
+                let next = filtered_values.get(i + 1).unwrap();
                 if current.fahrt_speed > 0. || next.fahrt_speed > 0. {
                     pure_driving_time += next.fahrt_zeit - current.fahrt_zeit;
                 }
             }
             self.cache.pure_driving_time = Some(pure_driving_time);
             Ok(pure_driving_time)
-        } else if result.value.len() > 0 {
+        } else if result.fahrt_eintraege.len() > 0 {
             Ok(Duration::seconds(0))
         } else {
             Err(AnalyseError::NoEntries)
@@ -205,7 +205,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
 
         let schedule: Schedule = filter_valid_fahrt_weg_and_fahrt_speed(result).into_iter().fold(
             (vec![], false),
-            |(mut entries, mut missing_departure), ResultValue::FahrtEintrag(fahrt_eintrag)| {
+            |(mut entries, mut missing_departure), fahrt_eintrag| {
                 match (
                     &fahrt_eintrag.fahrt_typ,
                     &fahrt_eintrag.fahrt_zeit,

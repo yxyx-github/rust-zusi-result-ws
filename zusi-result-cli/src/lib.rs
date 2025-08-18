@@ -97,12 +97,10 @@ fn read_result(path: &PathBuf) -> Result<ZusiResult, ReadResultError> {
     let mut contents = String::new();
     input_file.read_to_string(&mut contents)?;
     let zusi = Zusi::from_xml(&contents)?;
-    for value in zusi.value {
-        if let ZusiValue::Result(result) = value {
-            return Ok(result);
-        }
+    match zusi.value {
+        ZusiValue::Result(result) => Ok(result),
+        _ => Err(ReadResultError::NoResult)
     }
-    Err(ReadResultError::NoResult)
 }
 
 #[derive(Debug)]
