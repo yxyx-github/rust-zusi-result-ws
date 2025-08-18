@@ -8,7 +8,7 @@ use std::ops::Mul;
 
 const VERTICAL_LABEL_WIDTH: usize = 200;
 const HORIZONTAL_LABEL_HEIGHT: usize = 100;
-const SPEED_SCALE: usize = 10;
+const SPEED_SCALE_FACTOR: usize = 10;
 
 pub fn generate(data: &ChartData, config: &ChartConfig) -> SVGString {
     let graph_resolution = graph_resolution(data);
@@ -21,6 +21,8 @@ pub fn generate(data: &ChartData, config: &ChartConfig) -> SVGString {
     let scaled_graph_width = scaled_graph_resolution.x;
 
     let speed_graph = generate_speed_curve(&data, graph_height);
+    let speed_labeling = generate_speed_labeling(&data, graph_height);
+
     let svg = format!(r#"
         <svg viewBox="0 0 {actual_chart_width} {actual_chart_height}" xmlns="http://www.w3.org/2000/svg">
             <style type="text/css">
@@ -36,6 +38,7 @@ pub fn generate(data: &ChartData, config: &ChartConfig) -> SVGString {
                 <rect x="0" y="0" width="{graph_width}" height="{graph_height}" stroke="black" fill="white"/>
                 {speed_graph}
             </svg>
+            {speed_labeling}
         </svg>
     "#).into();
     svg
@@ -43,7 +46,7 @@ pub fn generate(data: &ChartData, config: &ChartConfig) -> SVGString {
 
 fn graph_resolution(data: &ChartData) -> Resolution {
     let height = data.entries().iter().fold(0, |height, entry| {
-        let entry_height = entry.max_speed_value().kilometers_per_hour().mul(SPEED_SCALE as f32).ceil() as usize + 5 * SPEED_SCALE;
+        let entry_height = entry.max_speed_value().kilometers_per_hour().mul(SPEED_SCALE_FACTOR as f32).ceil() as usize + 5 * SPEED_SCALE_FACTOR;
         max(height, entry_height)
     });
     Resolution {
@@ -80,9 +83,14 @@ fn generate_speed_curve(data: &ChartData, y_zero: usize) -> SVGString {
             format!(
                 "{},{}",
                 entry.distance,
-                y_zero - entry.actual_speed.kilometers_per_hour().round() as usize * SPEED_SCALE,
+                y_zero - entry.actual_speed.kilometers_per_hour().round() as usize * SPEED_SCALE_FACTOR,
             )
         )
         .collect::<Vec<String>>().join(" ");
     format!(r#"<polyline points="{points}" class="speed-curve"/>"#).into()
+}
+
+fn generate_speed_labeling(data: &ChartData, scale_height: usize) -> SVGString {
+
+    todo!()
 }
