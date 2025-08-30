@@ -10,7 +10,7 @@ use glob::{glob, PatternError};
 use zusi_result_lib::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm, ResultAnalyser};
 use zusi_result_lib::result_analyser_group::{CreateAnalyserGroupError, ResultAnalyserGroup};
 use zusi_xml_lib::xml::zusi::result::ZusiResult;
-use zusi_xml_lib::xml::zusi::{DeError, Zusi, ZusiValue};
+use zusi_xml_lib::xml::zusi::{DeError, FromXML, Zusi, ZusiValue};
 
 #[derive(Debug)]
 pub enum AnalyseFilesError {
