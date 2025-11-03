@@ -8,7 +8,6 @@ use zusi_xml_lib::xml::zusi::result::ZusiResult;
 #[test]
 fn test_cache() {
     let result1 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(0.)
@@ -33,7 +32,6 @@ fn test_cache() {
         ])
         .build();
     let result2 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(0.)
@@ -78,7 +76,6 @@ fn test_cache() {
 fn test_create_analyser_group_from_ref() {
     let mut analyser = ResultAnalyser::new(
         ZusiResult::builder()
-            .datum(datetime!(2019-01-01 23:14))
             .fahrt_eintraege(vec![])
             .build()
     );
@@ -96,7 +93,6 @@ fn test_create_analyser_group_error() {
 #[test]
 fn test_total_distance() {
     let result1 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(2.33)
@@ -109,7 +105,6 @@ fn test_total_distance() {
         ])
         .build();
     let result2 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(7.33)
@@ -133,7 +128,6 @@ fn test_total_distance() {
 #[test]
 fn test_total_distance_with_error() {
     let result1 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(7.33)
@@ -146,7 +140,6 @@ fn test_total_distance_with_error() {
         ])
         .build();
     let result2 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![])
         .build();
 
@@ -164,7 +157,6 @@ fn test_total_distance_with_error() {
 #[test]
 fn test_average_distance() {
     let result1 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(2.33)
@@ -177,7 +169,6 @@ fn test_average_distance() {
         ])
         .build();
     let result2 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(7.33)
@@ -201,7 +192,6 @@ fn test_average_distance() {
 #[test]
 fn test_average_distance_with_error() {
     let result1 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(2.33)
@@ -214,7 +204,6 @@ fn test_average_distance_with_error() {
         ])
         .build();
     let result2 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![])
         .build();
 
@@ -232,7 +221,6 @@ fn test_average_distance_with_error() {
 #[test]
 fn test_average_speed_2() {
     let result1 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(0.)
@@ -247,7 +235,6 @@ fn test_average_speed_2() {
         ])
         .build();
     let result2 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(0.)
@@ -273,7 +260,6 @@ fn test_average_speed_2() {
 #[test]
 fn test_average_speed_2_zero_driving_time() {
     let result1 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(0.)
@@ -288,7 +274,6 @@ fn test_average_speed_2_zero_driving_time() {
         ])
         .build();
     let result2 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(0.)
@@ -314,7 +299,6 @@ fn test_average_speed_2_zero_driving_time() {
 #[test]
 fn test_pure_average_speed_2() {
     let result1 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(10.)
@@ -329,7 +313,6 @@ fn test_pure_average_speed_2() {
         ])
         .build();
     let result2 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(10.)
@@ -356,7 +339,6 @@ fn test_pure_average_speed_2() {
 #[test]
 fn test_pure_average_speed_1() {
     let result1 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(3.)
@@ -366,7 +348,6 @@ fn test_pure_average_speed_1() {
         ])
         .build();
     let result2 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_weg(9.)
@@ -388,11 +369,9 @@ fn test_pure_average_speed_1() {
 #[test]
 fn test_pure_average_speed_0() {
     let result1 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![])
         .build();
     let result2 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![])
         .build();
 
@@ -408,7 +387,6 @@ fn test_pure_average_speed_0() {
 #[test]
 fn test_total_driving_time() {
     let result1 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_zeit(datetime!(2019-01-01 23:18))
@@ -419,7 +397,6 @@ fn test_total_driving_time() {
         ])
         .build();
     let result2 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_zeit(datetime!(2019-01-01 23:18))
@@ -441,7 +418,6 @@ fn test_total_driving_time() {
 #[test]
 fn test_total_driving_time_with_error() {
     let result1 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_zeit(datetime!(2019-01-01 23:18))
@@ -452,7 +428,6 @@ fn test_total_driving_time_with_error() {
         ])
         .build();
     let result2 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![])
         .build();
 
@@ -470,7 +445,6 @@ fn test_total_driving_time_with_error() {
 #[test]
 fn test_total_pure_driving_time() {
     let result1 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_zeit(datetime!(2019-01-01 23:08))
@@ -487,7 +461,6 @@ fn test_total_pure_driving_time() {
         ])
         .build();
     let result2 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_zeit(datetime!(2019-01-01 23:08))
@@ -515,7 +488,6 @@ fn test_total_pure_driving_time() {
 #[test]
 fn test_total_pure_driving_time_with_error() {
     let result1 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![
             FahrtEintrag::builder()
                 .fahrt_zeit(datetime!(2019-01-01 23:18))
@@ -526,7 +498,6 @@ fn test_total_pure_driving_time_with_error() {
         ])
         .build();
     let result2 = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![])
         .build();
 
@@ -544,7 +515,6 @@ fn test_total_pure_driving_time_with_error() {
 #[test]
 fn test_try_from_results() {
     let result = ZusiResult::builder()
-        .datum(datetime!(2019-01-01 23:14))
         .fahrt_eintraege(vec![])
         .build();
 

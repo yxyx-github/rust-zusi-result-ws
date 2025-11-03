@@ -32,7 +32,6 @@ mod tests {
     #[test]
     fn test_filter_valid_fahrt_weg_and_fahrt_speed() {
         let result = ZusiResult::builder()
-            .datum(datetime!(2019-01-01 23:14))
             .fahrt_eintraege(vec![
                 FahrtEintrag::builder()
                     .fahrt_weg(-1.)
