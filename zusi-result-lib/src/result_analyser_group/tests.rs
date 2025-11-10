@@ -56,7 +56,7 @@ fn test_cache() {
         ])
         .build();
 
-    let mut analyser_group = ResultAnalyserGroup::new(vec![
+    let analyser_group = ResultAnalyserGroup::new(vec![
         ResultAnalyser::new(result1),
         ResultAnalyser::new(result2),
     ]).unwrap();
@@ -117,7 +117,7 @@ fn test_total_distance() {
         ])
         .build();
 
-    let mut analyser_group = ResultAnalyserGroup::new(vec![
+    let analyser_group = ResultAnalyserGroup::new(vec![
         ResultAnalyser::new(result1),
         ResultAnalyser::new(result2),
     ]).unwrap();
@@ -143,7 +143,7 @@ fn test_total_distance_with_error() {
         .fahrt_eintraege(vec![])
         .build();
 
-    let mut analyser_group = ResultAnalyserGroup::new(vec![
+    let analyser_group = ResultAnalyserGroup::new(vec![
         ResultAnalyser::new(result1),
         ResultAnalyser::new(result2),
     ]).unwrap();
@@ -181,7 +181,7 @@ fn test_average_distance() {
         ])
         .build();
 
-    let mut analyser_group = ResultAnalyserGroup::new(vec![
+    let analyser_group = ResultAnalyserGroup::new(vec![
         ResultAnalyser::new(result1),
         ResultAnalyser::new(result2),
     ]).unwrap();
@@ -207,7 +207,7 @@ fn test_average_distance_with_error() {
         .fahrt_eintraege(vec![])
         .build();
 
-    let mut analyser_group = ResultAnalyserGroup::new(vec![
+    let analyser_group = ResultAnalyserGroup::new(vec![
         ResultAnalyser::new(result1),
         ResultAnalyser::new(result2),
     ]).unwrap();
@@ -249,7 +249,7 @@ fn test_average_speed_2() {
         ])
         .build();
 
-    let mut analyser_group = ResultAnalyserGroup::new(vec![
+    let analyser_group = ResultAnalyserGroup::new(vec![
         ResultAnalyser::new(result1),
         ResultAnalyser::new(result2),
     ]).unwrap();
@@ -288,7 +288,7 @@ fn test_average_speed_2_zero_driving_time() {
         ])
         .build();
 
-    let mut analyser_group = ResultAnalyserGroup::new(vec![
+    let analyser_group = ResultAnalyserGroup::new(vec![
         ResultAnalyser::new(result1),
         ResultAnalyser::new(result2),
     ]).unwrap();
@@ -327,7 +327,7 @@ fn test_pure_average_speed_2() {
         ])
         .build();
 
-    let mut analyser_group = ResultAnalyserGroup::new(vec![
+    let analyser_group = ResultAnalyserGroup::new(vec![
         ResultAnalyser::new(result1),
         ResultAnalyser::new(result2),
     ]).unwrap();
@@ -357,7 +357,7 @@ fn test_pure_average_speed_1() {
         ])
         .build();
 
-    let mut analyser_group = ResultAnalyserGroup::new(vec![
+    let analyser_group = ResultAnalyserGroup::new(vec![
         ResultAnalyser::new(result1),
         ResultAnalyser::new(result2),
     ]).unwrap();
@@ -375,7 +375,7 @@ fn test_pure_average_speed_0() {
         .fahrt_eintraege(vec![])
         .build();
 
-    let mut analyser_group = ResultAnalyserGroup::new(vec![
+    let analyser_group = ResultAnalyserGroup::new(vec![
         ResultAnalyser::new(result1),
         ResultAnalyser::new(result2),
     ]).unwrap();
@@ -407,7 +407,7 @@ fn test_total_driving_time() {
         ])
         .build();
 
-    let mut analyser_group = ResultAnalyserGroup::new(vec![
+    let analyser_group = ResultAnalyserGroup::new(vec![
         ResultAnalyser::new(result1),
         ResultAnalyser::new(result2),
     ]).unwrap();
@@ -431,7 +431,7 @@ fn test_total_driving_time_with_error() {
         .fahrt_eintraege(vec![])
         .build();
 
-    let mut analyser_group = ResultAnalyserGroup::new(vec![
+    let analyser_group = ResultAnalyserGroup::new(vec![
         ResultAnalyser::new(result1),
         ResultAnalyser::new(result2),
     ]).unwrap();
@@ -477,7 +477,7 @@ fn test_total_pure_driving_time() {
         ])
         .build();
 
-    let mut analyser_group = ResultAnalyserGroup::new(vec![
+    let analyser_group = ResultAnalyserGroup::new(vec![
         ResultAnalyser::new(result1),
         ResultAnalyser::new(result2),
     ]).unwrap();
@@ -501,7 +501,7 @@ fn test_total_pure_driving_time_with_error() {
         .fahrt_eintraege(vec![])
         .build();
 
-    let mut analyser_group = ResultAnalyserGroup::new(vec![
+    let analyser_group = ResultAnalyserGroup::new(vec![
         ResultAnalyser::new(result1),
         ResultAnalyser::new(result2),
     ]).unwrap();

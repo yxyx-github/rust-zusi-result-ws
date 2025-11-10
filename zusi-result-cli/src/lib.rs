@@ -123,7 +123,7 @@ impl From<CreateAnalyserGroupError> for PrintAnalysisError {
 
 fn print_analysis(results: Vec<ZusiResult>) -> Result<(), PrintAnalysisError> {
     if results.len() == 1 {
-        let mut analyser = ResultAnalyser::new(results.first().unwrap());
+        let analyser = ResultAnalyser::new(results.first().unwrap());
         let schedule = analyser.schedule()?;
 
         println!("{}", "Schedule:".bold());
@@ -132,7 +132,7 @@ fn print_analysis(results: Vec<ZusiResult>) -> Result<(), PrintAnalysisError> {
         println!("{schedule}");
     }
 
-    let mut analyser_group: ResultAnalyserGroup<_, _> = results.try_into()?;
+    let analyser_group: ResultAnalyserGroup<_, _> = results.try_into()?;
 
     println!("{}", "Analysis results:".bold());
     println!();

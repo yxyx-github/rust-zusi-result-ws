@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use crate::result_analyser::analyser_cache::AnalyserCache;
 use crate::result_analyser::helpers::{filter_valid_fahrt_weg_and_fahrt_speed, round_primitive_date_time};
 use crate::result_analyser::schedule::{Schedule, ScheduleEntry};
@@ -21,22 +22,22 @@ pub enum AnalyseError {
 #[derive(PartialEq, Debug)]
 pub struct ResultAnalyser<R> {
     result: R,
-    cache: AnalyserCache,
+    cache: RefCell<AnalyserCache>,
 }
 
 impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
     pub fn new(result: R) -> ResultAnalyser<R> {
         Self {
             result,
-            cache: AnalyserCache::new(),
+            cache: RefCell::new(AnalyserCache::new()),
         }
     }
 
     /// Computes the distance for the whole route by using the `fahrt_weg` attribute.
     ///
     /// Throws [AnalyseError::NoEntries] if the [ZusiResult] does not contain any [FahrtEintrag](ResultValue::FahrtEintrag) entries.
-    pub fn distance(&mut self) -> Result<f32, AnalyseError> {
-        if let Some(value) = &self.cache.distance {
+    pub fn distance(&self) -> Result<f32, AnalyseError> {
+        if let Some(value) = &self.cache.borrow().distance {
             return Ok(*value);
         }
 
@@ -50,7 +51,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
             let last = filtered_entries.last().unwrap();
             let distance = last.fahrt_weg - first.fahrt_weg;
 
-            self.cache.distance = Some(distance);
+            self.cache.borrow_mut().distance = Some(distance);
             Ok(distance)
         } else {
             Err(AnalyseError::NoEntries)
@@ -60,8 +61,8 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
     /// Computes the average speed including idle times by using the overall driving time and distance.
     ///
     /// Throws [AnalyseError::ZeroDrivingTime] if the computed driving time is zero.
-    pub fn average_speed(&mut self) -> Result<f32, AnalyseError> {
-        if let Some(value) = &self.cache.average_speed {
+    pub fn average_speed(&self) -> Result<f32, AnalyseError> {
+        if let Some(value) = &self.cache.borrow().average_speed {
             return Ok(*value);
         }
 
@@ -70,7 +71,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
         } else {
             let average_speed = self.distance()? / self.driving_time()?.as_seconds_f32();
 
-            self.cache.average_speed = Some(average_speed);
+            self.cache.borrow_mut().average_speed = Some(average_speed);
             Ok(average_speed)
         }
     }
@@ -79,7 +80,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
     ///
     /// Throws [AnalyseError::NoEntries] if the [ZusiResult] does not contain any [FahrtEintrag](ResultValue::FahrtEintrag) entries.
     /// Throws [AnalyseError::ZeroDrivingTime] or [AnalyseError::ZeroDistance] depending on selected algorithm.
-    pub fn pure_average_speed(&mut self, algorithm: PureAverageSpeedAlgorithm) -> Result<f32, AnalyseError> {
+    pub fn pure_average_speed(&self, algorithm: PureAverageSpeedAlgorithm) -> Result<f32, AnalyseError> {
         match algorithm {
             PureAverageSpeedAlgorithm::PureDrivingTime => self.pure_average_speed_by_pure_driving_time(),
             PureAverageSpeedAlgorithm::WeightedLocalSpeeds => self.pure_average_speed_by_weighted_local_speeds(),
@@ -90,8 +91,8 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
     ///
     /// Throws [AnalyseError::NoEntries] if the [ZusiResult] does not contain any [FahrtEintrag](ResultValue::FahrtEintrag) entries.
     /// Throws [AnalyseError::ZeroDrivingTime] if the time driven is zero.
-    fn pure_average_speed_by_pure_driving_time(&mut self) -> Result<f32, AnalyseError> {
-        if let Some(value) = &self.cache.pure_average_speed_by_pure_driving_time {
+    fn pure_average_speed_by_pure_driving_time(&self) -> Result<f32, AnalyseError> {
+        if let Some(value) = &self.cache.borrow().pure_average_speed_by_pure_driving_time {
             return Ok(*value);
         }
 
@@ -102,7 +103,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
         } else {
             let pure_average_speed = distance / pure_driving_time;
 
-            self.cache.pure_average_speed_by_pure_driving_time = Some(pure_average_speed);
+            self.cache.borrow_mut().pure_average_speed_by_pure_driving_time = Some(pure_average_speed);
             Ok(pure_average_speed)
         }
     }
@@ -113,8 +114,8 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
     ///
     /// Throws [AnalyseError::NoEntries] if the [ZusiResult] does not contain any [FahrtEintrag](ResultValue::FahrtEintrag) entries.
     /// Throws [AnalyseError::ZeroDistance] if the distance driven is zero.
-    fn pure_average_speed_by_weighted_local_speeds(&mut self) -> Result<f32, AnalyseError> {
-        if let Some(value) = &self.cache.pure_average_speed_by_weighted_local_speeds {
+    fn pure_average_speed_by_weighted_local_speeds(&self) -> Result<f32, AnalyseError> {
+        if let Some(value) = &self.cache.borrow().pure_average_speed_by_weighted_local_speeds {
             return Ok(*value);
         }
 
@@ -137,7 +138,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
             }
             let pure_average_speed = weighted_speed_sum / self.pure_driving_time()?.as_seconds_f32();
 
-            self.cache.pure_average_speed_by_weighted_local_speeds = Some(pure_average_speed);
+            self.cache.borrow_mut().pure_average_speed_by_weighted_local_speeds = Some(pure_average_speed);
             Ok(pure_average_speed)
         } else {
             Err(AnalyseError::NoEntries)
@@ -147,8 +148,8 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
     /// Computes the whole driving time including idle times by using the `fahrt_zeit` attribute.
     ///
     /// Throws [AnalyseError::NoEntries] if the [ZusiResult] does not contain any [FahrtEintrag](ResultValue::FahrtEintrag) entries.
-    pub fn driving_time(&mut self) -> Result<Duration, AnalyseError> {
-        if let Some(value) = &self.cache.driving_time {
+    pub fn driving_time(&self) -> Result<Duration, AnalyseError> {
+        if let Some(value) = &self.cache.borrow().driving_time {
             return Ok(*value);
         }
 
@@ -158,7 +159,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
             let last = result.fahrt_eintraege.last().unwrap();
             let driving_time = last.fahrt_zeit - first.fahrt_zeit;
 
-            self.cache.driving_time = Some(driving_time);
+            self.cache.borrow_mut().driving_time = Some(driving_time);
             Ok(driving_time)
         } else {
             Err(AnalyseError::NoEntries)
@@ -168,8 +169,8 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
     /// Computes the whole driving time excluding idle times by omitting all periods with zero driving speed.
     ///
     /// Throws [AnalyseError::NoEntries] if the [ZusiResult] does not contain any [FahrtEintrag](ResultValue::FahrtEintrag) entries.
-    pub fn pure_driving_time(&mut self) -> Result<Duration, AnalyseError> {
-        if let Some(value) = &self.cache.pure_driving_time {
+    pub fn pure_driving_time(&self) -> Result<Duration, AnalyseError> {
+        if let Some(value) = &self.cache.borrow().pure_driving_time {
             return Ok(*value);
         }
 
@@ -187,7 +188,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
                     pure_driving_time += next.fahrt_zeit - current.fahrt_zeit;
                 }
             }
-            self.cache.pure_driving_time = Some(pure_driving_time);
+            self.cache.borrow_mut().pure_driving_time = Some(pure_driving_time);
             Ok(pure_driving_time)
         } else if result.fahrt_eintraege.len() > 0 {
             Ok(Duration::seconds(0))
@@ -196,8 +197,8 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
         }
     }
 
-    pub fn schedule(&mut self) -> Result<Schedule, AnalyseError> {
-        if let Some(value) = &self.cache.schedule {
+    pub fn schedule(&self) -> Result<Schedule, AnalyseError> {
+        if let Some(value) = &self.cache.borrow().schedule {
             return Ok((*value).clone());
         }
 
@@ -236,7 +237,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
             }
         ).0.into();
 
-        self.cache.schedule = Some(schedule.clone());
+        self.cache.borrow_mut().schedule = Some(schedule.clone());
         Ok(schedule)
     }
 }
@@ -244,12 +245,6 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
 impl<R: AsRef<ZusiResult>> AsRef<ResultAnalyser<R>> for ResultAnalyser<R> {
     fn as_ref(&self) -> &ResultAnalyser<R> {
         &self
-    }
-}
-
-impl<R: AsRef<ZusiResult>> AsMut<ResultAnalyser<R>> for ResultAnalyser<R> {
-    fn as_mut(&mut self) -> &mut ResultAnalyser<R> {
-        self
     }
 }
 
