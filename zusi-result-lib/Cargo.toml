@@ -4,6 +4,6 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-clap = { workspace = true, features = ["derive"] }
+thiserror.workspace = true
 time = { workspace = true, features = ["macros", "serde-human-readable"] }
 zusi-xml-lib.workspace = true

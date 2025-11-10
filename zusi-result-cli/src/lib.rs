@@ -7,27 +7,19 @@ use std::path::PathBuf;
 use colored::Colorize;
 use crate::cli::AnalyseFilesArgs;
 use glob::{glob, PatternError};
+use thiserror::Error;
 use zusi_result_lib::result_analyser::{AnalyseError, PureAverageSpeedAlgorithm, ResultAnalyser};
 use zusi_result_lib::result_analyser_group::{CreateAnalyserGroupError, ResultAnalyserGroup};
 use zusi_xml_lib::xml::zusi::result::ZusiResult;
 use zusi_xml_lib::xml::zusi::{DeError, FromXML, Zusi, ZusiValue};
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum AnalyseFilesError {
-    PatternError(PatternError),
-    PrintAnalysisError(PrintAnalysisError),
-}
+    #[error("The given pattern was invalid: {0}")]
+    PatternError(#[from] PatternError),
 
-impl From<PatternError> for AnalyseFilesError {
-    fn from(value: PatternError) -> Self {
-        AnalyseFilesError::PatternError(value)
-    }
-}
-
-impl From<PrintAnalysisError> for AnalyseFilesError {
-    fn from(value: PrintAnalysisError) -> Self {
-        AnalyseFilesError::PrintAnalysisError(value)
-    }
+    #[error("The given pattern was invalid: {0}")]
+    PrintAnalysisError(#[from] PrintAnalysisError),
 }
 
 pub fn analyse_files(args: AnalyseFilesArgs) -> Result<(), AnalyseFilesError> {
@@ -57,23 +49,16 @@ pub fn analyse_files(args: AnalyseFilesArgs) -> Result<(), AnalyseFilesError> {
     Ok(())
 }
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 enum ReadResultError {
-    IOError(io::Error),
-    DeError(DeError),
+    #[error("An IO error occoured: {0}")]
+    IOError(#[from] io::Error),
+
+    #[error("A deserialization error occoured: {0}")]
+    DeError(#[from] DeError),
+
+    #[error("The file must contain at least one result.")]
     NoResult,
-}
-
-impl From<io::Error> for ReadResultError {
-    fn from(value: io::Error) -> Self {
-        ReadResultError::IOError(value)
-    }
-}
-
-impl From<DeError> for ReadResultError {
-    fn from(value: DeError) -> Self {
-        ReadResultError::DeError(value)
-    }
 }
 
 impl ReadResultError {
@@ -103,22 +88,13 @@ fn read_result(path: &PathBuf) -> Result<ZusiResult, ReadResultError> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Error, Debug, Clone, PartialEq)]
 pub enum PrintAnalysisError {
-    CreateAnalyserGroupError(CreateAnalyserGroupError),
-    AnalyseError(AnalyseError),
-}
+    #[error("Couldn't create the analyser group: {0}")]
+    CreateAnalyserGroupError(#[from] CreateAnalyserGroupError),
 
-impl From<AnalyseError> for PrintAnalysisError {
-    fn from(value: AnalyseError) -> Self {
-        PrintAnalysisError::AnalyseError(value)
-    }
-}
-
-impl From<CreateAnalyserGroupError> for PrintAnalysisError {
-    fn from(value: CreateAnalyserGroupError) -> Self {
-        PrintAnalysisError::CreateAnalyserGroupError(value)
-    }
+    #[error("Couldn't analyse: {0}")]
+    AnalyseError(#[from] AnalyseError),
 }
 
 fn print_analysis(results: Vec<ZusiResult>) -> Result<(), PrintAnalysisError> {

@@ -1,7 +1,8 @@
-use std::cell::RefCell;
 use crate::result_analyser::analyser_cache::AnalyserCache;
 use crate::result_analyser::helpers::{filter_valid_fahrt_weg_and_fahrt_speed, round_primitive_date_time};
 use crate::result_analyser::schedule::{Schedule, ScheduleEntry};
+use std::cell::RefCell;
+use thiserror::Error;
 use time::Duration;
 use zusi_xml_lib::xml::zusi::result::fahrt_eintrag::FahrtTyp;
 use zusi_xml_lib::xml::zusi::result::ZusiResult;
@@ -12,10 +13,15 @@ mod helpers;
 mod analyser_cache;
 mod schedule;
 
-#[derive(PartialEq, Debug)]
+#[derive(Error, Debug, Clone, PartialEq)]
 pub enum AnalyseError {
+    #[error("The result does not contain any entries.")]
     NoEntries,
+
+    #[error("The distance must not be zero.")]
     ZeroDistance,
+
+    #[error("The driving time must not be zero.")]
     ZeroDrivingTime,
 }
 

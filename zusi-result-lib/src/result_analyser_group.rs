@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::marker::PhantomData;
+use thiserror::Error;
 use time::Duration;
 use zusi_xml_lib::xml::zusi::result::ZusiResult;
 
@@ -10,8 +11,9 @@ use crate::result_analyser_group::analyser_group_cache::AnalyserGroupCache;
 mod tests;
 mod analyser_group_cache;
 
-#[derive(PartialEq, Debug)]
+#[derive(Error, Debug, Clone, PartialEq)]
 pub enum CreateAnalyserGroupError {
+    #[error("At least one analyser is required.")]
     NoAnalysers,
 }
 
