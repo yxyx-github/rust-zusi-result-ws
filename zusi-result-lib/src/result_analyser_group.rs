@@ -44,11 +44,9 @@ impl<A: AsRef<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
             return Ok(*value);
         }
 
-        let mut total_distance = 0.;
-
-        for analyser in self.analysers.iter() {
-            total_distance += analyser.as_ref().distance()?;
-        }
+        let total_distance = self.analysers.iter().try_fold(0., |total_distance, analyser|
+            Ok(total_distance + analyser.as_ref().distance()?)
+        )?;
 
         self.cache.borrow_mut().total_distance = Some(total_distance);
         Ok(total_distance)
@@ -126,10 +124,13 @@ impl<A: AsRef<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
             return Ok(*value);
         }
 
-        let mut weighted_speed_sum = 0.;
-        for analyser in self.analysers.iter() {
-            weighted_speed_sum += analyser.as_ref().pure_driving_time()?.as_seconds_f32() * analyser.as_ref().pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds)?;
-        }
+        let weighted_speed_sum = self.analysers.iter().try_fold(0., |weighted_speed_sum, analyser|
+            Ok(
+                weighted_speed_sum
+                    + analyser.as_ref().pure_driving_time()?.as_seconds_f32()
+                    * analyser.as_ref().pure_average_speed(PureAverageSpeedAlgorithm::WeightedLocalSpeeds)?
+            )
+        )?;
 
         let pure_average_speed = weighted_speed_sum / self.total_pure_driving_time()?.as_seconds_f32();
 
@@ -146,11 +147,9 @@ impl<A: AsRef<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
             return Ok(*value);
         }
 
-        let mut total_driving_time = Duration::seconds(0);
-
-        for analyser in self.analysers.iter() {
-            total_driving_time += analyser.as_ref().driving_time()?;
-        }
+        let total_driving_time = self.analysers.iter().try_fold(Duration::seconds(0), |total_driving_time, analyser|
+            Ok(total_driving_time + analyser.as_ref().driving_time()?)
+        )?;
 
         self.cache.borrow_mut().total_driving_time = Some(total_driving_time);
         Ok(total_driving_time)
@@ -165,11 +164,9 @@ impl<A: AsRef<ResultAnalyser<R>>, R: AsRef<ZusiResult>> ResultAnalyserGroup<A, R
             return Ok(*value);
         }
 
-        let mut total_pure_driving_time = Duration::seconds(0);
-
-        for analyser in self.analysers.iter() {
-            total_pure_driving_time += analyser.as_ref().pure_driving_time()?;
-        }
+        let total_pure_driving_time = self.analysers.iter().try_fold(Duration::seconds(0), |total_pure_driving_time, analyser|
+            Ok(total_pure_driving_time + analyser.as_ref().pure_driving_time()?)
+        )?;
 
         self.cache.borrow_mut().total_pure_driving_time = Some(total_pure_driving_time);
         Ok(total_pure_driving_time)
