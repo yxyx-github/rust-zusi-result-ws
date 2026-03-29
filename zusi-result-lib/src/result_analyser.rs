@@ -134,8 +134,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
         if distance == 0. {
             Err(AnalyseError::ZeroDistance)
         } else if filtered_values.len() > 1 {
-            let weighted_speed_sum = filtered_values.windows(2).fold(0., |weighted_speed_sum, window| {
-                let (current, next) = (window[0], window[1]);
+            let weighted_speed_sum = filtered_values.array_windows::<2>().fold(0., |weighted_speed_sum, [current, next]| {
                 let local_average_speed = (current.fahrt_speed + next.fahrt_speed) / 2.;
                 let local_driving_time = next.fahrt_zeit - current.fahrt_zeit;
                 weighted_speed_sum + local_driving_time.as_seconds_f32() * local_average_speed
@@ -184,8 +183,7 @@ impl<R: AsRef<ZusiResult>> ResultAnalyser<R> {
         let filtered_values = filter_valid_fahrt_weg_and_fahrt_speed(result);
 
         if filtered_values.len() > 1 {
-            let pure_driving_time = filtered_values.windows(2).fold(Duration::seconds(0), |mut pure_driving_time, window| {
-                let (current, next) = (window[0], window[1]);
+            let pure_driving_time = filtered_values.array_windows::<2>().fold(Duration::seconds(0), |mut pure_driving_time, [current, next]| {
                 if current.fahrt_speed > 0. || next.fahrt_speed > 0. {
                     pure_driving_time += next.fahrt_zeit - current.fahrt_zeit;
                 }
